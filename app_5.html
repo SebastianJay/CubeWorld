@@ -8,6 +8,7 @@
 <script type="text/javascript" src="webgl-utils.js"></script>
 
 <script type="text/javascript" src="map_builder.js"></script>
+<script type="text/javascript" src="input_handler.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -276,15 +277,26 @@
         cubeVertexIndexBuffer.itemSize = 1;
         cubeVertexIndexBuffer.numItems = 36;
 		
-		alert("TRYING TO MAKE MAP");
+		//alert("TRYING TO MAKE MAP");
 		createMap();
+		//alert("out of createmap");
     }
 
 
+	/*
     var xRot = 0;
     var yRot = 0;
     var zRot = 0;
-
+	*/
+	var xPos = 0;
+	var yPos = 0.5;
+	var zPos = 0;
+	var yaw = 0;
+	var pitch = 0;
+	var yawRate = 0;
+	var pitchRate = 0;
+	var walkSpeed = 0;
+	
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -316,19 +328,7 @@
         gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 		*/
 		
-		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, [0.0, 0.0, -5.0]);
-		gl.bindBuffer(gl.ARRAY_BUFFER, mapBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mapBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mapTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, neheTexture);
-        gl.uniform1i(shaderProgram.samplerUniform, 0);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
-        setMatrixUniforms();
-        gl.drawElements(gl.TRIANGLES, mapVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-		
+		drawMap();
     }
 
 
@@ -339,9 +339,14 @@
         if (lastTime != 0) {
             var elapsed = timeNow - lastTime;
 
-            xRot += (90 * elapsed) / 1000.0;
-            yRot += (90 * elapsed) / 1000.0;
-            zRot += (90 * elapsed) / 1000.0;
+            if (speed != 0) {
+                xPos -= Math.sin(degToRad(yaw)) * speed * elapsed;
+                zPos -= Math.cos(degToRad(yaw)) * speed * elapsed;
+            }
+
+            yaw += yawRate * elapsed;
+            pitch += pitchRate * elapsed;
+
         }
         lastTime = timeNow;
     }
@@ -349,7 +354,8 @@
 
     function tick() {
         requestAnimFrame(tick);
-        drawScene();
+        handleKeys();
+		drawScene();
         animate();
     }
 
@@ -364,6 +370,9 @@
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
 
+		document.onkeydown = handleKeyDown;
+        document.onkeyup = handleKeyUp;
+
         tick();
     }
 
@@ -375,7 +384,7 @@
 
 
 <body onload="webGLStart();">
-    <canvas id="lesson05-canvas" style="border: none;" width="500" height="500"></canvas>
+    <canvas id="lesson05-canvas" style="border: none;" width="1280" height="720"></canvas>
 </body>
 
 </html>
