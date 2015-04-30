@@ -8,6 +8,10 @@
 // grounded
 
 var currentlyPressedKeys = {};
+var pitchRateMag = 0.1;
+var yawRateMag = 0.1;
+var walkSpeedMag = 0.003;
+
 function handleKeyDown(event) {
 	currentlyPressedKeys[event.keyCode] = true;
 }
@@ -18,32 +22,32 @@ function handleKeyUp(event) {
 function handleKeys() {
 	if (currentlyPressedKeys[33]) {
 		// Page Up
-		pitchRate = 0.1;
+		pitchRate = pitchRateMag;
 	} else if (currentlyPressedKeys[34]) {
 		// Page Down
-		pitchRate = -0.1;
+		pitchRate = -pitchRateMag;
 	} else {
 		pitchRate = 0;
 	}
 
 	if (currentlyPressedKeys[37] || currentlyPressedKeys[65]) {
 		// Left cursor key or A
-		yawRate = 0.1;
+		yawRate = yawRateMag;
 	} else if (currentlyPressedKeys[39] || currentlyPressedKeys[68]) {
 		// Right cursor key or D
-		yawRate = -0.1;
+		yawRate = -yawRateMag;
 	} else {
 		yawRate = 0;
 	}
 
 	if (currentlyPressedKeys[38] || currentlyPressedKeys[87]) {
 		// Up cursor key or W
-		speed = 0.003;
+		walkSpeed = walkSpeedMag;
 	} else if (currentlyPressedKeys[40] || currentlyPressedKeys[83]) {
 		// Down cursor key
-		speed = -0.003;
+		walkSpeed = -walkSpeedMag;
 	} else {
-		speed = 0;
+		walkSpeed = 0;
 	}
 
 }

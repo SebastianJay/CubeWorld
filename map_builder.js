@@ -1,10 +1,11 @@
 
 var tileNum = 20;
-var cubeSideLength = 40.0;
+var cubeSideLength = 40.0;	//center at (0, 0, 0)
 
 var mapPositionStack = [];
 var mapTextureStack = [];
 var mapVertexIndexStack = [];
+var elevationStack = [];
 
 function randInt(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
@@ -25,9 +26,15 @@ function createFace(sign, num)
 	var vertices = [];
 	var textureCoords = [];
 	var mapVertexIndices = [];
-	for (i = 0; i < tileNum; i++) {
-		for (j = 0; j < tileNum; j++) {
-			var elevation = randInt(-1, 2);
+	var elevations = [];
+	for (var i = 0; i < tileNum; i++) {
+		for (var j = 0; j < tileNum; j++) {
+			var elevation; 
+			if (i > 0 && j > 0 && i < tileNum-1 && j < tileNum-1)
+				elevation = randInt(-1, 2);
+			else
+				elevation = 0;
+			elevations.push(sign*base + elevation * 0.2);
 			var base = -cubeSideLength / 2;
 			
 			//there's probably a smarter way to do this.
@@ -125,6 +132,7 @@ function createFace(sign, num)
 	mapPositionStack.push(mapBuffer);
 	mapTextureStack.push(mapTextureBuffer);
 	mapVertexIndexStack.push(mapVertexIndexBuffer);
+	elevationStack.push(elevations);
 }
 
 function drawMap() 
