@@ -5,7 +5,7 @@
 // xpos, ypos, zpos
 // yaw, pitch
 // pitchRate, yawRate, walkSpeed
-// grounded
+// jumpReq
 
 var currentlyPressedKeys = {};
 var pitchRateMag = 0.1;
@@ -50,4 +50,9 @@ function handleKeys() {
 		walkSpeed = 0;
 	}
 
+	if (currentlyPressedKeys[32]) {
+		jumpReq = true;
+	} else {
+		jumpReq = false;
+	}
 }

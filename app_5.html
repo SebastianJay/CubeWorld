@@ -298,12 +298,21 @@
 	var yawRate = 0;
 	var pitchRate = 0;
 	var walkSpeed = 0;
-	
+	var jumpReq = false;
+	var grounded = false;
+	var jumping = false;
+
 	var height = 0.5;
 	var gravX = 0.0;
 	var gravY = -1.0;
 	var gravZ = 0.0;
-	var gravMag = 0.005;
+	var gravMag = 0.00005;
+	var gravTimer = 0.0;
+	var gravVel = 0.0;
+	
+	var jumpMag = 0.00005;
+	var jumpInit = 0.007;
+	var jumpVel = 0.0;
 	
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -354,17 +363,45 @@
 
             yaw += yawRate * elapsed;
             pitch += pitchRate * elapsed;
-
 			
-			var xpos1 = xPos + gravX * gravMag * elapsed;
-			var ypos1 = yPos + gravY * gravMag * elapsed;
-			var zpos1 = zPos + gravZ * gravMag * elapsed;
-			if (checkCollisionGravity(xpos1, ypos1, zpos1)) {
+			if (jumping) {
+				jumpVel -= elapsed * jumpMag;
+				console.log('doin jump');
+				if (jumpVel < 0) {
+					jumpVel = 0;
+					jumping = false;
+				}
+				var xpos1 = xPos + -gravX * jumpVel * elapsed;
+				var ypos1 = yPos + -gravY * jumpVel * elapsed;
+				var zpos1 = zPos + -gravZ * jumpVel * elapsed;
 				xPos = xpos1;
 				yPos = ypos1;
 				zPos = zpos1;
 			}
-			
+			else {
+				var xpos1 = xPos + gravX * gravVel * elapsed;
+				var ypos1 = yPos + gravY * gravVel * elapsed;
+				var zpos1 = zPos + gravZ * gravVel * elapsed;
+				retLst = checkCollisionGravity(xpos1, ypos1, zpos1);
+				if (retLst[0]) {
+					xPos = xpos1;
+					yPos = ypos1;
+					zPos = zpos1;
+					grounded = false;
+					gravVel += elapsed * gravMag;
+				} else {
+					xPos = retLst[1];
+					yPos = retLst[2];
+					zPos = retLst[3];
+					grounded = true;
+					gravVel = 0.0;
+				}
+			}
+			if (jumpReq && grounded) {
+				jumpVel = jumpInit;
+				jumping = true;
+				grounded = false;
+			}
         }
         lastTime = timeNow;
     }

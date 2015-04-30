@@ -1,6 +1,7 @@
 
 var tileNum = 20;
 var cubeSideLength = 40.0;	//center at (0, 0, 0)
+var tileLength = 2.0;
 
 var mapPositionStack = [];
 var mapTextureStack = [];
@@ -29,64 +30,65 @@ function createFace(sign, num)
 	var elevations = [];
 	for (var i = 0; i < tileNum; i++) {
 		for (var j = 0; j < tileNum; j++) {
-			var elevation; 
+			var elevationNum; 
 			if (i > 0 && j > 0 && i < tileNum-1 && j < tileNum-1)
-				elevation = randInt(-1, 2);
+				elevationNum = randInt(-1, 2);
 			else
-				elevation = 0;
-			elevations.push(sign*base + elevation * 0.2);
+				elevationNum = 0;
 			var base = -cubeSideLength / 2;
+			var elevation = -sign*base + elevationNum * 0.2;
+			elevations.push(elevation);
 			
 			//there's probably a smarter way to do this.
 			if (num == 0) {
-				vertices.push(base + (i*2.0));
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + (j*2.0));
+				vertices.push(base + (i*tileLength));
+				vertices.push(elevation);
+				vertices.push(base + (j*tileLength));
 				
-				vertices.push(base + ((i+1)*2.0));
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + (j*2.0));
+				vertices.push(base + ((i+1)*tileLength));
+				vertices.push(elevation);
+				vertices.push(base + (j*tileLength));
 
-				vertices.push(base + (i*2.0));
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + ((j+1)*2.0));
+				vertices.push(base + (i*tileLength));
+				vertices.push(elevation);
+				vertices.push(base + ((j+1)*tileLength));
 
-				vertices.push(base + ((i+1)*2.0));
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + ((j+1)*2.0));
+				vertices.push(base + ((i+1)*tileLength));
+				vertices.push(elevation);
+				vertices.push(base + ((j+1)*tileLength));
 			}
 			else if (num == 1) {
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + (i*2.0));
-				vertices.push(base + (j*2.0));
+				vertices.push(elevation);
+				vertices.push(base + (i*tileLength));
+				vertices.push(base + (j*tileLength));
 
-				vertices.push(sign*base + elevation * 0.2);				
-				vertices.push(base + ((i+1)*2.0));
-				vertices.push(base + (j*2.0));
+				vertices.push(elevation);				
+				vertices.push(base + ((i+1)*tileLength));
+				vertices.push(base + (j*tileLength));
 
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + (i*2.0));
-				vertices.push(base + ((j+1)*2.0));
+				vertices.push(elevation);
+				vertices.push(base + (i*tileLength));
+				vertices.push(base + ((j+1)*tileLength));
 
-				vertices.push(sign*base + elevation * 0.2);
-				vertices.push(base + ((i+1)*2.0));
-				vertices.push(base + ((j+1)*2.0));
+				vertices.push(elevation);
+				vertices.push(base + ((i+1)*tileLength));
+				vertices.push(base + ((j+1)*tileLength));
 			} else if (num == 2) {
-				vertices.push(base + (i*2.0));
-				vertices.push(base + (j*2.0));
-				vertices.push(sign*base + elevation * 0.2);
+				vertices.push(base + (i*tileLength));
+				vertices.push(base + (j*tileLength));
+				vertices.push(elevation);
 
-				vertices.push(base + ((i+1)*2.0));
-				vertices.push(base + (j*2.0));
-				vertices.push(sign*base + elevation * 0.2);				
+				vertices.push(base + ((i+1)*tileLength));
+				vertices.push(base + (j*tileLength));
+				vertices.push(elevation);				
 
-				vertices.push(base + (i*2.0));
-				vertices.push(base + ((j+1)*2.0));
-				vertices.push(sign*base + elevation * 0.2);				
+				vertices.push(base + (i*tileLength));
+				vertices.push(base + ((j+1)*tileLength));
+				vertices.push(elevation);				
 
-				vertices.push(base + ((i+1)*2.0));
-				vertices.push(base + ((j+1)*2.0));
-				vertices.push(sign*base + elevation * 0.2);				
+				vertices.push(base + ((i+1)*tileLength));
+				vertices.push(base + ((j+1)*tileLength));
+				vertices.push(elevation);				
 			}
 			
 			textureCoords.push(0.0);
