@@ -13,130 +13,211 @@
 //5 - positive z
 
 var epsilon = 0.0001;
+var wallDist = 0.5;
 function checkCollisionGravity(xpos1, ypos1, zpos1) {
-	if (gravY < 0) {
-		var groundElevations = elevationStack[0];
-		var base = -cubeSideLength / 2;
-		var flag = false;
-		var i, j;
-		for (i = 0; i < tileNum; i++) {
-			for (j = 0; j < tileNum; j++) {
-				if (xPos+epsilon > base + i*2.0 && xPos-epsilon < base + (i+1)*2.0
-					&& zPos+epsilon > base + j*2.0 && zPos-epsilon < base + (j+1)*2.0) {
-					if (ypos1-height < groundElevations[i*tileNum + j]) {
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (flag)
-				break;
-		}
-		return [!flag, xpos1, groundElevations[i*tileNum+j]+height, zpos1];
+	var groundElevations;
+	var base = -cubeSideLength / 2;
+	var ipos;
+	var jpos;
+	var hpos;
+	var i, j;
+	var flag = false;
+	if (gravY < 0 || gravY > 0) {
+		if (gravY < 0)
+			groundElevations = elevationStack[0];
+		else
+			groundElevations = elevationStack[1];
+		ipos = xPos;
+		jpos = zPos;
+		hpos = ypos1;
+	} else if (gravX < 0 || gravX > 0) {
+		if (gravX < 0)
+			groundElevations = elevationStack[2];
+		else
+			groundElevations = elevationStack[3];
+		ipos = yPos;
+		jpos = zPos;
+		hpos = xpos1;		
+	} else if (gravZ < 0 || gravZ > 0) {
+		if (gravZ < 0)
+			groundElevations = elevationStack[4];
+		else
+			groundElevations = elevationStack[5];
+		ipos = xPos;
+		jpos = yPos;
+		hpos = zpos1;
 	}
-	else if (gravY > 0) {
-		var groundElevations = elevationStack[1];
-		var base = -cubeSideLength / 2;
-		var flag = false;
-		var i, j;
-		for (i = 0; i < tileNum; i++) {
-			for (j = 0; j < tileNum; j++) {
-				if (xPos+epsilon > base + i*2.0 && xPos-epsilon < base + (i+1)*2.0
-					&& zPos+epsilon > base + j*2.0 && zPos-epsilon < base + (j+1)*2.0) {
-					if (ypos1+height > groundElevations[i*tileNum + j]) {
+	
+	for (i = 0; i < tileNum; i++) {
+		for (j = 0; j < tileNum; j++) {
+			if (ipos+epsilon > base + i*tileLength && ipos-epsilon < base + (i+1)*tileLength
+				&& jpos+epsilon > base + j*tileLength && jpos-epsilon < base + (j+1)*tileLength) {
+				
+				if (gravY < 0 || gravX < 0 || gravZ < 0) {
+					if (hpos-height < groundElevations[i*tileNum + j]) {
+						flag = true;
+						break;
+					}
+				} else {
+					if (hpos+height > groundElevations[i*tileNum + j]) {
 						flag = true;
 						break;
 					}
 				}
 			}
-			if (flag)
-				break;
 		}
-		return [!flag, xpos1, groundElevations[i*tileNum+j]-height, zpos1];		
+		if (flag)
+			break;
 	}
-	else if (gravX < 0) {
-		var groundElevations = elevationStack[2];
-		var base = -cubeSideLength / 2;
-		var flag = false;
-		var i, j;
-		for (i = 0; i < tileNum; i++) {
-			for (j = 0; j < tileNum; j++) {
-				if (yPos+epsilon > base + i*2.0 && yPos-epsilon < base + (i+1)*2.0
-					&& zPos+epsilon > base + j*2.0 && zPos-epsilon < base + (j+1)*2.0) {
-					if (xpos1-height < groundElevations[i*tileNum + j]) {
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (flag)
-				break;
-		}
-		return [!flag, groundElevations[i*tileNum+j]+height, ypos1, zpos1];		
+	
+	if (flag) {
+		if (gravY < 0)
+			return [false, xpos1, groundElevations[i*tileNum+j]+height, zpos1];
+		if (gravY > 0)
+			return [false, xpos1, groundElevations[i*tileNum+j]-height, zpos1];
+		if (gravX < 0)
+			return [false, groundElevations[i*tileNum+j]+height, ypos1, zpos1];
+		if (gravX > 0)
+			return [false, groundElevations[i*tileNum+j]-height, ypos1, zpos1];
+		if (gravZ < 0)
+			return [false, xpos1, ypos1, groundElevations[i*tileNum+j]+height];
+		if (gravZ > 0)
+			return [false, xpos1, ypos1, groundElevations[i*tileNum+j]-height];		
 	}
-	else if (gravX > 0) {
-		var groundElevations = elevationStack[3];
-		var base = -cubeSideLength / 2;
-		var flag = false;
-		var i, j;
-		for (i = 0; i < tileNum; i++) {
-			for (j = 0; j < tileNum; j++) {
-				if (yPos+epsilon > base + i*2.0 && yPos-epsilon < base + (i+1)*2.0
-					&& zPos+epsilon > base + j*2.0 && zPos-epsilon < base + (j+1)*2.0) {
-					if (xpos1+height > groundElevations[i*tileNum + j]) {
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (flag)
-				break;
-		}
-		return [!flag, groundElevations[i*tileNum+j]-height, ypos1, zpos1];		
-	}
-	else if (gravZ < 0) {
-		var groundElevations = elevationStack[4];
-		var base = -cubeSideLength / 2;
-		var flag = false;
-		var i, j;
-		for (i = 0; i < tileNum; i++) {
-			for (j = 0; j < tileNum; j++) {
-				if (xPos+epsilon > base + i*2.0 && xPos-epsilon < base + (i+1)*2.0
-					&& yPos+epsilon > base + j*2.0 && yPos-epsilon < base + (j+1)*2.0) {
-					if (zpos1-height < groundElevations[i*tileNum + j]) {
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (flag)
-				break;
-		}
-		return [!flag, xpos1, ypos1, groundElevations[i*tileNum+j]+height];		
-	}	
-	else if (gravZ > 0) {
-		var groundElevations = elevationStack[5];
-		var base = -cubeSideLength / 2;
-		var flag = false;
-		var i, j;
-		for (i = 0; i < tileNum; i++) {
-			for (j = 0; j < tileNum; j++) {
-				if (xPos+epsilon > base + i*2.0 && xPos-epsilon < base + (i+1)*2.0
-					&& yPos+epsilon > base + j*2.0 && yPos-epsilon < base + (j+1)*2.0) {
-					if (zpos1+height > groundElevations[i*tileNum + j]) {
-						flag = true;
-						break;
-					}
-				}
-			}
-			if (flag)
-				break;
-		}
-		return [!flag, xpos1, ypos1, groundElevations[i*tileNum+j]-height];		
-	}	
-	return [false];
+	return [true];
 }
 
+
+
+
 function checkCollisionGeneral(xpos1, ypos1, zpos1) {
+	var groundElevations;
+	var base = -cubeSideLength / 2;
+	var iPos, jPos, hPos;
+	var ipos, jpos, hpos;
+	var i, j;
+	var flag = false;
+	if (gravY < 0 || gravY > 0) {
+		if (gravY < 0)
+			groundElevations = elevationStack[0];
+		else
+			groundElevations = elevationStack[1];
+		iPos = xPos;
+		jPos = zPos;
+		hPos = yPos;
+		ipos = xpos1;
+		jpos = zpos1;
+		hpos = ypos1;
+	} else if (gravX < 0 || gravX > 0) {
+		if (gravX < 0)
+			groundElevations = elevationStack[2];
+		else
+			groundElevations = elevationStack[3];
+		iPos = yPos;
+		jPos = zPos;
+		hPos = xPos;
+		ipos = ypos1;
+		jpos = zpos1;
+		hpos = xpos1;
+	} else if (gravZ < 0 || gravZ > 0) {
+		if (gravZ < 0)
+			groundElevations = elevationStack[4];
+		else
+			groundElevations = elevationStack[5];
+		iPos = xPos;
+		jPos = yPos;
+		hPos = zPos;
+		ipos = xpos1;
+		jpos = ypos1;
+		hpos = zpos1;
+	}
 	
+	if (ipos < base+wallDist || ipos > base + cubeSideLength -wallDist || jpos < base +wallDist || jpos > base + cubeSideLength - wallDist) {
+		if (gravY < 0 || gravY > 0)
+			return [false, Math.min(Math.max(ipos, base+wallDist), base+cubeSideLength-wallDist), hpos, Math.min(Math.max(jpos, base+wallDist), base+cubeSideLength-wallDist) ]
+		if (gravX < 0 || gravX > 0)
+			return [false, hpos, Math.min(Math.max(ipos, base+wallDist), base+cubeSideLength-wallDist), Math.min(Math.max(jpos, base+wallDist), base+cubeSideLength-wallDist) ]	
+		if (gravZ < 0 || gravZ > 0)
+			return [false, Math.min(Math.max(ipos, base+wallDist), base+cubeSideLength-wallDist), Math.min(Math.max(jpos, base+wallDist), base+cubeSideLength-wallDist), hpos ]			
+	} 
+	
+	for (i = 0; i < tileNum; i++) {
+		for (j = 0; j < tileNum; j++) {
+			if (ipos+epsilon > base + i*tileLength && ipos-epsilon < base + (i+1)*tileLength
+				&& jpos+epsilon > base + j*tileLength && jpos-epsilon < base + (j+1)*tileLength) {
+				if (gravY < 0 || gravX < 0 || gravZ < 0) {
+					if (hpos-height < groundElevations[i*tileNum + j]) {
+						flag = true;
+						break;
+					} else if (iPos+epsilon < base + i*tileLength && jPos+epsilon < base+j*tileLength && 
+						(hpos-height < groundElevations[i*tileLength+j+1] || hpos-height < groundElevations[(i+1)*tileLength+j])) {
+						flag = true;
+						break;
+					} else if (iPos-epsilon > base + (i+1)*tileLength && jPos-epsilon > base+(j+1)*tileLength && 
+						(hpos-height < groundElevations[i*tileLength+j-1] || hpos-height < groundElevations[(i-1)*tileLength+j])) {
+						flag = true;
+						break;
+					} else if (iPos+epsilon < base + i*tileLength && jPos-epsilon > base+(j+1)*tileLength && 
+						(hpos-height < groundElevations[i*tileLength+j+1] || hpos-height < groundElevations[(i-1)*tileLength+j])) {
+						flag = true;
+						break;
+					} else if (iPos-epsilon > base + (i+1)*tileLength && jPos+epsilon < base+j*tileLength && 
+						(hpos-height < groundElevations[i*tileLength+j-1] || hpos-height < groundElevations[(i+1)*tileLength+j])) {
+						flag = true;
+						break;
+					}				
+				} else {
+					if (hpos+height > groundElevations[i*tileNum + j]) {
+						flag = true;
+						break;
+					} else if (iPos+epsilon < base + i*tileLength && jPos+epsilon < base+j*tileLength && 
+						(hpos+height > groundElevations[i*tileLength+j+1] || hpos+height > groundElevations[(i+1)*tileLength+j])) {
+						flag = true;
+						break;
+					} else if (iPos-epsilon > base + (i+1)*tileLength && jPos-epsilon > base+(j+1)*tileLength && 
+						(hpos+height > groundElevations[i*tileLength+j-1] || hpos+height > groundElevations[(i-1)*tileLength+j])) {
+						flag = true;
+						break;
+					} else if (iPos+epsilon < base + i*tileLength && jPos-epsilon > base+(j+1)*tileLength && 
+						(hpos+height > groundElevations[i*tileLength+j+1] || hpos+height > groundElevations[(i-1)*tileLength+j])) {
+						flag = true;
+						break;
+					} else if (iPos-epsilon > base + (i+1)*tileLength && jPos+epsilon < base+j*tileLength && 
+						(hpos+height > groundElevations[i*tileLength+j-1] || hpos+height > groundElevations[(i+1)*tileLength+j])) {
+						flag = true;
+						break;
+					}	
+				}
+			}
+		}
+		if (flag)
+			break;
+	}
+	
+	if (flag) {
+		var iret, jret;
+		if (iPos+epsilon < base + i*tileLength) {
+			iret = base+i*tileLength - 2*epsilon;
+		} else if (iPos-epsilon > base + (i+1)*tileLength) {
+			iret = base+(i+1)*tileLength + 2*epsilon;
+		} else {
+			iret = ipos;
+		}
+		
+		if (jPos+epsilon < base+j*tileLength) {
+			jret = base+j*tileLength - 2*epsilon;
+		} else if (jPos-epsilon > base+(j+1)*tileLength) {
+			jret = base+(j+1)*tileLength + 2*epsilon;
+		} else {
+			jret = jpos;
+		}
+		
+		if (gravY < 0 || gravY > 0)
+			return [!flag, iret, hpos, jret];
+		if (gravX < 0 || gravX > 0)
+			return [!flag, hpos, iret, jret];
+		if (gravZ < 0 || gravZ > 0)
+			return [!flag, iret, jret, hpos];	
+	}
+	return [true];
 }

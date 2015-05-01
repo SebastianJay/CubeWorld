@@ -357,16 +357,53 @@
             var elapsed = timeNow - lastTime;
 
             if (walkSpeed != 0) {
-                xPos -= Math.sin(degToRad(yaw)) * walkSpeed * elapsed;
-                zPos -= Math.cos(degToRad(yaw)) * walkSpeed * elapsed;
+				var xpos1, ypos1, zpos1;
+				if (gravY < 0 || gravY > 0) {
+					var sign;
+					if (gravY < 0)
+						sign = -1;
+					else
+						sign = 1;
+					xpos1 = xPos - Math.sin(degToRad(yaw)) * walkSpeed * elapsed;
+					ypos1 = yPos;
+					zpos1 = zPos + sign*Math.cos(degToRad(yaw)) * walkSpeed * elapsed;
+				} else if (gravX < 0 || gravX > 0) {
+					var sign;
+					if (gravX < 0)
+						sign = -1;
+					else
+						sign = 1;
+					xpos1 = xPos;
+					ypos1 = yPos + Math.sin(degToRad(-sign*yaw)) * walkSpeed * elapsed;
+					zpos1 = zPos - Math.cos(degToRad(-sign*yaw)) * walkSpeed * elapsed;					
+				} else if (gravZ < 0 || gravZ > 0) {
+					var sign;
+					if (gravZ < 0)
+						sign = -1;
+					else
+						sign = 1;
+					xpos1 = xPos - sign*Math.sin(degToRad(sign*yaw)) * walkSpeed * elapsed;
+					ypos1 = yPos - sign*Math.cos(degToRad(-yaw)) * walkSpeed * elapsed;
+					zpos1 = zPos;
+				}
+				
+				var retLst = checkCollisionGeneral(xpos1, ypos1, zpos1);
+				if (retLst[0]) {
+					xPos = xpos1;
+					yPos = ypos1;
+					zPos = zpos1;
+				} else {
+					xPos = retLst[1];
+					yPos = retLst[2];
+					zPos = retLst[3];
+				}
             }
-
+			
             yaw += yawRate * elapsed;
             pitch += pitchRate * elapsed;
 			
 			if (jumping) {
 				jumpVel -= elapsed * jumpMag;
-				console.log('doin jump');
 				if (jumpVel < 0) {
 					jumpVel = 0;
 					jumping = false;
@@ -382,7 +419,7 @@
 				var xpos1 = xPos + gravX * gravVel * elapsed;
 				var ypos1 = yPos + gravY * gravVel * elapsed;
 				var zpos1 = zPos + gravZ * gravVel * elapsed;
-				retLst = checkCollisionGravity(xpos1, ypos1, zpos1);
+				var retLst = checkCollisionGravity(xpos1, ypos1, zpos1);
 				if (retLst[0]) {
 					xPos = xpos1;
 					yPos = ypos1;

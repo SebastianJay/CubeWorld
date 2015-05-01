@@ -140,9 +140,35 @@ function createFace(sign, num)
 function drawMap() 
 {
 	mat4.identity(mvMatrix);
-	mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
-	mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]);
-	mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);
+	if (gravX < 0) {
+		mat4.rotate(mvMatrix, degToRad(90), [0, 0, 1]);
+		mat4.rotate(mvMatrix, degToRad(pitch), [0, 1, 0]);
+		mat4.rotate(mvMatrix, degToRad(-yaw), [1, 0, 0]);
+	} 
+	else if (gravX > 0) {
+		mat4.rotate(mvMatrix, degToRad(-90), [0, 0, 1]);
+		mat4.rotate(mvMatrix, degToRad(-pitch), [0, 1, 0]);
+		mat4.rotate(mvMatrix, degToRad(+yaw), [1, 0, 0]);
+	} 
+	else if (gravZ < 0) {
+		mat4.rotate(mvMatrix, degToRad(-90), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(-yaw), [0, 0, 1]);		
+	}
+	else if (gravZ > 0) {
+		mat4.rotate(mvMatrix, degToRad(90), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(yaw), [0, 0, 1]);				
+	}
+	else if (gravY > 0) {
+		mat4.rotate(mvMatrix, degToRad(180), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(yaw), [0, 1, 0]);						
+	} else {
+		mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
+		mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]);
+	}
+	mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);		
 	
 	for (i = 0; i < mapPositionStack.length; i++) {
 		var mapBuffer = mapPositionStack[i];
