@@ -137,6 +137,22 @@ function createFace(sign, num)
 	elevationStack.push(elevations);
 }
 
+function mapIntToGroundTexture(i)
+{
+	if (i==0)
+		return gl.TEXTURE5;
+	if (i==1)
+		return gl.TEXTURE4;
+	if (i==2)
+		return gl.TEXTURE3;
+	if (i==3)
+		return gl.TEXTURE2;
+	if (i==4)
+		return gl.TEXTURE1;
+	if (i==5)
+		return gl.TEXTURE0;
+}
+
 function drawMap() 
 {
 	mat4.identity(mvMatrix);
@@ -170,7 +186,7 @@ function drawMap()
 	}
 	mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);		
 	
-	for (i = 0; i < mapPositionStack.length; i++) {
+	for (var i = 0; i < mapPositionStack.length; i++) {
 		var mapBuffer = mapPositionStack[i];
 		var mapTextureBuffer = mapTextureStack[i];
 		var mapVertexIndexBuffer = mapVertexIndexStack[i];
@@ -180,7 +196,7 @@ function drawMap()
 		gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
 		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mapTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, neheTexture);
+		gl.bindTexture(gl.TEXTURE_2D, groundTextureStack[i]);
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
 		setMatrixUniforms();
