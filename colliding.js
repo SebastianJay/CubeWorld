@@ -221,3 +221,55 @@ function checkCollisionGeneral(xpos1, ypos1, zpos1) {
 	}
 	return [true];
 }
+
+
+//uses xPos, yPos, zPos, 
+// uses/modifies gravX, gravY, gravZ
+function checkGravitySwitch() {
+	var base = -cubeSideLength / 2;
+	var end = cubeSideLength / 2;
+	if (gravY < 0 || gravY > 0) {
+		if (xPos < base + tileLength) {
+			gravY = 0.0;
+			gravX = -1.0;
+		} else if (xPos > end - tileLength) {
+			gravY = 0.0;
+			gravX = 1.0;
+		} else if (zPos < base + tileLength) {
+			gravY = 0.0;
+			gravZ = -1.0;
+		} else if (zPos > end - tileLength) {
+			gravY = 0.0;
+			gravZ = 1.0;
+		}
+	} else if (gravX < 0 || gravX > 0) {
+		if (yPos < base + tileLength) {
+			gravX = 0.0;
+			gravY = -1.0;
+		} else if (yPos > end - tileLength) {
+			gravX = 0.0;
+			gravY = 1.0;
+		} else if (zPos < base + tileLength) {
+			gravX = 0.0;
+			gravZ = -1.0;
+		} else if (zPos > end - tileLength) {
+			gravX = 0.0;
+			gravZ = 1.0;
+		}
+	} else if (gravZ < 0 || gravZ > 0) {
+		if (xPos < base + tileLength) {
+			gravZ = 0.0;
+			gravX = -1.0;
+		} else if (xPos > end - tileLength) {
+			gravZ = 0.0;
+			gravX = 1.0;
+		} else if (yPos < base + tileLength) {
+			gravZ = 0.0;
+			gravY = -1.0;
+		} else if (yPos > end - tileLength) {
+			gravZ = 0.0;
+			gravY = 1.0;
+		}
+	}	
+}
+

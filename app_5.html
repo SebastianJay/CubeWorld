@@ -407,6 +407,7 @@
 				if (jumpVel < 0) {
 					jumpVel = 0;
 					jumping = false;
+					checkGravitySwitch();
 				}
 				var xpos1 = xPos + -gravX * jumpVel * elapsed;
 				var ypos1 = yPos + -gravY * jumpVel * elapsed;
