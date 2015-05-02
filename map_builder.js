@@ -44,7 +44,7 @@ function createFace(sign, num)
 		for (var j = 0; j < tileNum; j++) {
 			var elevationNum; 
 			if (i > 0 && j > 0 && i < tileNum-1 && j < tileNum-1)
-				elevationNum = randInt(-1, 2);
+				elevationNum = randInt(-2, 3);
 			else
 				elevationNum = 0;
 			var base = -cubeSideLength / 2;
@@ -148,16 +148,16 @@ function createSidingHelper(v1, v2, v3, v4, ind, sign, counter, groundElevation,
 		vertices.push(allverts[k]);
 	
 	textureCoords.push(0.0);
-	textureCoords.push(0.0);
+	textureCoords.push(1.0);
 	
 	textureCoords.push(1.0);
-	textureCoords.push(0.0);
-
-	textureCoords.push(1.0);
 	textureCoords.push(1.0);
 
-	textureCoords.push(0.0);
 	textureCoords.push(1.0);
+	textureCoords.push(0.0);
+
+	textureCoords.push(0.0);
+	textureCoords.push(0.0);
 
 	vertexIndices.push(counter*4);
 	vertexIndices.push(counter*4+1);
@@ -265,7 +265,7 @@ function createSiding(sign, ind) {
 	sidingVertexIndexStack.push(sidingVertexIndexBuffer);
 }
 
-function drawMap() 
+function prepMatrixTransforms()
 {
 	mat4.identity(mvMatrix);
 	if (gravX < 0) {
@@ -296,8 +296,11 @@ function drawMap()
 		mat4.rotate(mvMatrix, degToRad(-pitch), [1, 0, 0]);
 		mat4.rotate(mvMatrix, degToRad(-yaw), [0, 1, 0]);
 	}
-	mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);		
-	
+	mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);
+}
+
+function drawMap() 
+{	
 	for (var i = 0; i < mapPositionStack.length; i++) {
 		var mapBuffer = mapPositionStack[i];
 		var mapTextureBuffer = mapTextureStack[i];
@@ -308,7 +311,7 @@ function drawMap()
 		gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
 		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mapTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, groundTextureStack[i]);
+		gl.bindTexture(gl.TEXTURE_2D, textureStack[i]);
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
 		setMatrixUniforms();
@@ -325,7 +328,7 @@ function drawMap()
 		gl.bindBuffer(gl.ARRAY_BUFFER, sidingTextureBuffer);
 		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, sidingTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, groundTextureStack[i]);
+		gl.bindTexture(gl.TEXTURE_2D, textureStack[i+6]);
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sidingVertexIndexBuffer);
 		setMatrixUniforms();

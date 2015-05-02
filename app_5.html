@@ -10,6 +10,7 @@
 <script type="text/javascript" src="map_builder.js"></script>
 <script type="text/javascript" src="input_handler.js"></script>
 <script type="text/javascript" src="colliding.js"></script>
+<script type="text/javascript" src="collectibles.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -121,7 +122,7 @@
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
     }
 
-	var groundTextureStack = [];
+	var textureStack = [];
 	var groundTextureFilenames = [
 		'grass_tile.png',
 		'shadow_tile.png',
@@ -129,6 +130,22 @@
 		'earth_tile.png',
 		'fire_tile.png',
 		'water_tile.png',
+	];
+	var sidingTextureFilenames = [
+		'grass_tile_side.png',
+		'shadow_tile_side.png',
+		'metal_tile_side.png',
+		'earth_tile_side.png',
+		'fire_tile.png',
+		'water_tile.png',
+	];
+	var collectTextureFilenames = [
+		'green_collect.png',
+		'purple_collect.png',
+		'yellow_collect.png',
+		'brown_collect.png',
+		'red_collect.png',
+		'blue_collect.png',
 	];
 	
 	function loadImage(url, callback) {
@@ -177,7 +194,7 @@
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[i]);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-			groundTextureStack.push(localTexture);
+			textureStack.push(localTexture);
 			gl.bindTexture(gl.TEXTURE_2D, null);
 			/*
 			localTexture.image = new Image();
@@ -220,6 +237,7 @@
 
     function initBuffers() {		
 		createMap();
+		createCollectibles();
     }
 
 	var xPos = 0;
@@ -251,8 +269,10 @@
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);		
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);	
+		prepMatrixTransforms();		
 		drawMap();
+		drawCollectibles();
     }
 
 
@@ -347,6 +367,8 @@
 				jumping = true;
 				grounded = false;
 			}
+			
+			checkCollisionCollectibles();
         }
         lastTime = timeNow;
     }
@@ -361,11 +383,13 @@
 
 
     function webGLStart() {
-        var canvas = document.getElementById("lesson05-canvas");
+        var canvas = document.getElementById("gl-canvas");
         initGL(canvas);
         initShaders();
         initBuffers();
-		loadImages(groundTextureFilenames, initTextures);
+		var allFilenames = groundTextureFilenames.concat(sidingTextureFilenames)
+			.concat(collectTextureFilenames);
+		loadImages(allFilenames, initTextures);
         //initTextures();
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -385,7 +409,7 @@
 
 
 <body onload="webGLStart();">
-    <canvas id="lesson05-canvas" style="border: none;" width="1280" height="720"></canvas>
+    <canvas id="gl-canvas" style="border: none;" width="1280" height="720"></canvas>
 </body>
 
 </html>
