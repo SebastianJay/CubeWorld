@@ -1,0 +1,27 @@
+
+//globals from map_builder
+// 
+
+var ambientLightFlat = [];
+var dirLightDirectionFlat = [];
+var dirLightColorFlat = [];
+var pointLightPositionFlat = [];
+var pointLightColorFlat = [];
+//var lightNum = 0;
+
+function createLights()
+{
+	createDirLight(0.0, -1.0, 0.0, 0.1, 0.1, 0.1);
+	pointLightPositionFlat.push(0.0, 0.0, 0.0);
+	pointLightColorFlat.push(0.5, 0.5, 0.5);
+	ambientLightFlat.push(0.25, 0.25, 0.25);
+}
+
+function createDirLight(xdir, ydir, zdir, rcolor, gcolor, bcolor)
+{
+	var mag = Math.sqrt(xdir*xdir + ydir*ydir + zdir*zdir);
+	var lightingDirNorm = [-xdir / mag, -ydir / mag, -zdir / mag];
+	
+	dirLightDirectionFlat.push(lightingDirNorm[0], lightingDirNorm[1], lightingDirNorm[2]);
+	dirLightColorFlat.push(rcolor, gcolor, bcolor);
+}

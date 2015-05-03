@@ -11,6 +11,7 @@
 <script type="text/javascript" src="input_handler.js"></script>
 <script type="text/javascript" src="colliding.js"></script>
 <script type="text/javascript" src="collectibles.js"></script>
+<script type="text/javascript" src="lighting.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -41,22 +42,27 @@
 	uniform vec3 uLightingDirection;
 	uniform vec3 uDirectionalColor;
 	
+	uniform vec3 uPointLightingPosition;
+	uniform vec3 uPointLightingColor;
+	
 	uniform bool uUseLighting;
 	
     varying vec2 vTextureCoord;
 	varying vec3 vLightWeighting;
 
     void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+        gl_Position = uPMatrix * mvPosition;
         vTextureCoord = aTextureCoord;
 
 		if (!uUseLighting) {
 			vLightWeighting = vec3(1.0, 1.0, 1.0);
 		} else {
 			vec3 transformedNormal = uNMatrix * aVertexNormal;
+			vec3 pointLightDir = normalize(uPointLightingPosition - mvPosition.xyz);
 			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
-			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
-			
+			float pointLightWeighting = max(dot(transformedNormal, pointLightDir), 0.0);
+			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting + uPointLightingColor * pointLightWeighting;
 		}
     }
 </script>
@@ -149,6 +155,8 @@
 		shaderProgram.ambientColorUniform = gl.getUniformLocation(shaderProgram, "uAmbientColor");
 		shaderProgram.lightingDirectionUniform = gl.getUniformLocation(shaderProgram, "uLightingDirection");
 		shaderProgram.directionalColorUniform = gl.getUniformLocation(shaderProgram, "uDirectionalColor");
+		shaderProgram.pointLightingPositionUniform = gl.getUniformLocation(shaderProgram, "uPointLightingPosition");
+		shaderProgram.pointLightingColorUniform = gl.getUniformLocation(shaderProgram, "uPointLightingColor");
     }
 
 	var textureStack = [];
@@ -257,6 +265,7 @@
     function initBuffers() {		
 		createMap();
 		createCollectibles();
+		createLights();
     }
 
 	var xPos = 0;

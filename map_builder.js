@@ -355,13 +355,11 @@ function drawMap()
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
 		
 		gl.uniform1i(shaderProgram.useLightingUniform, true);
-		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5);
-		var lightingDir = [-1.0, -1.0, 0.0];
-		var lightingDirNorm = vec3.create();
-		vec3.normalize(lightingDir, lightingDirNorm);
-		vec3.scale(lightingDirNorm, -1);
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, lightingDirNorm);
-		gl.uniform3f(shaderProgram.directionalColorUniform, 0.7, 0.7, 0.7);
+		gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, dirLightDirectionFlat);
+		gl.uniform3fv(shaderProgram.directionalColorUniform, dirLightColorFlat);
+		gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
+		gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
 		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
 		setMatrixUniforms();
@@ -385,13 +383,11 @@ function drawMap()
 		gl.uniform1i(shaderProgram.samplerUniform, 0);
 		
 		gl.uniform1i(shaderProgram.useLightingUniform, true);
-		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5);
-		var lightingDir = [-1.0, -1.0, 0.0];
-		var lightingDirNorm = vec3.create();
-		vec3.normalize(lightingDir, lightingDirNorm);
-		vec3.scale(lightingDirNorm, -1);
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, lightingDirNorm);
-		gl.uniform3f(shaderProgram.directionalColorUniform, 0.7, 0.7, 0.7);
+		gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, dirLightDirectionFlat);
+		gl.uniform3fv(shaderProgram.directionalColorUniform, dirLightColorFlat);
+		gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
+		gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
 		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sidingVertexIndexBuffer);
 		setMatrixUniforms();
