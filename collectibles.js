@@ -152,9 +152,18 @@ function drawCollectibles() {
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextureBuffer);
 		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, vertexTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-		//gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
-		//gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertexNormalBuffer);
+		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+		gl.uniform1i(shaderProgram.useLightingUniform, true);
+		gl.uniform3f(shaderProgram.ambientColorUniform, 0.5, 0.5, 0.5);
+		var lightingDir = [-1.0, -1.0, 0.0];
+		var lightingDirNorm = vec3.create();
+		vec3.normalize(lightingDir, lightingDirNorm);
+		vec3.scale(lightingDirNorm, -1);
+		gl.uniform3fv(shaderProgram.lightingDirectionUniform, lightingDirNorm);
+		gl.uniform3f(shaderProgram.directionalColorUniform, 0.7, 0.7, 0.7);
+		
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 		setMatrixUniforms();
 		gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
