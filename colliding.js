@@ -16,6 +16,7 @@ var epsilon = 0.0001;
 var wallDist = 0.5;
 function checkCollisionGravity(xpos1, ypos1, zpos1) {
 	var groundElevations;
+	var properties;
 	var base = -cubeSideLength / 2;
 	var ipos;
 	var jpos;
@@ -23,26 +24,38 @@ function checkCollisionGravity(xpos1, ypos1, zpos1) {
 	var i, j;
 	var flag = false;
 	if (gravY < 0 || gravY > 0) {
-		if (gravY < 0)
+		if (gravY < 0) {
 			groundElevations = elevationStack[0];
-		else
+			properties = mapPropertyStack[0];
+		}
+		else {
 			groundElevations = elevationStack[1];
+			properties = mapPropertyStack[1];
+		}
 		ipos = xPos;
 		jpos = zPos;
 		hpos = ypos1;
 	} else if (gravX < 0 || gravX > 0) {
-		if (gravX < 0)
+		if (gravX < 0) {
 			groundElevations = elevationStack[2];
-		else
+			properties = mapPropertyStack[2];
+		}
+		else {
 			groundElevations = elevationStack[3];
+			properties = mapPropertyStack[3];
+		}
 		ipos = yPos;
 		jpos = zPos;
 		hpos = xpos1;		
 	} else if (gravZ < 0 || gravZ > 0) {
-		if (gravZ < 0)
+		if (gravZ < 0) {
 			groundElevations = elevationStack[4];
-		else
+			properties = mapPropertyStack[4];
+		}
+		else {
 			groundElevations = elevationStack[5];
+			properties = mapPropertyStack[5];
+		}
 		ipos = xPos;
 		jpos = yPos;
 		hpos = zpos1;
@@ -54,12 +67,12 @@ function checkCollisionGravity(xpos1, ypos1, zpos1) {
 				&& jpos+epsilon > base + j*tileLength && jpos-epsilon < base + (j+1)*tileLength) {
 				
 				if (gravY < 0 || gravX < 0 || gravZ < 0) {
-					if (hpos-height < groundElevations[i*tileNum + j]) {
+					if (hpos-height < groundElevations[i*tileNum + j] && properties[i*tileNum + j] != 'hole') {
 						flag = true;
 						break;
 					}
 				} else {
-					if (hpos+height > groundElevations[i*tileNum + j]) {
+					if (hpos+height > groundElevations[i*tileNum + j] && properties[i*tileNum + j] != 'hole') {
 						flag = true;
 						break;
 					}
@@ -92,16 +105,21 @@ function checkCollisionGravity(xpos1, ypos1, zpos1) {
 
 function checkCollisionGeneral(xpos1, ypos1, zpos1) {
 	var groundElevations;
+	var properties;
 	var base = -cubeSideLength / 2;
 	var iPos, jPos, hPos;
 	var ipos, jpos, hpos;
 	var i, j;
 	var flag = false;
 	if (gravY < 0 || gravY > 0) {
-		if (gravY < 0)
+		if (gravY < 0) {
 			groundElevations = elevationStack[0];
-		else
+			properties = mapPropertyStack[0];
+		}
+		else {
 			groundElevations = elevationStack[1];
+			properties = mapPropertyStack[1];
+		}
 		iPos = xPos;
 		jPos = zPos;
 		hPos = yPos;
@@ -109,10 +127,14 @@ function checkCollisionGeneral(xpos1, ypos1, zpos1) {
 		jpos = zpos1;
 		hpos = ypos1;
 	} else if (gravX < 0 || gravX > 0) {
-		if (gravX < 0)
+		if (gravX < 0) {
 			groundElevations = elevationStack[2];
-		else
+			properties = mapPropertyStack[2];
+		}
+		else {
 			groundElevations = elevationStack[3];
+			properties = mapPropertyStack[3];
+		}
 		iPos = yPos;
 		jPos = zPos;
 		hPos = xPos;
@@ -120,10 +142,14 @@ function checkCollisionGeneral(xpos1, ypos1, zpos1) {
 		jpos = zpos1;
 		hpos = xpos1;
 	} else if (gravZ < 0 || gravZ > 0) {
-		if (gravZ < 0)
+		if (gravZ < 0) {
 			groundElevations = elevationStack[4];
-		else
+			properties = mapPropertyStack[4];
+		}
+		else {
 			groundElevations = elevationStack[5];
+			properties = mapPropertyStack[5];
+		}
 		iPos = xPos;
 		jPos = yPos;
 		hPos = zPos;
@@ -146,7 +172,8 @@ function checkCollisionGeneral(xpos1, ypos1, zpos1) {
 			if (ipos+epsilon > base + i*tileLength && ipos-epsilon < base + (i+1)*tileLength
 				&& jpos+epsilon > base + j*tileLength && jpos-epsilon < base + (j+1)*tileLength) {
 				if (gravY < 0 || gravX < 0 || gravZ < 0) {
-					if (hpos-height < groundElevations[i*tileNum + j]) {
+					//todo: add tree, pole collisions to rest of logic
+					if (hpos-height < groundElevations[i*tileNum + j] || properties[i*tileNum + j] == 'tree' || properties[i*tileNum + j] == 'pole') {
 						flag = true;
 						break;
 					} else if (iPos+epsilon < base + i*tileLength && jPos+epsilon < base+j*tileLength && 

@@ -133,14 +133,20 @@ function createFace(sign, num)
 	}	
 	
 	//now create buffers
+	var counter = 0;
 	for (var i = 0; i < tileNum; i++) {
 		for (var j = 0; j < tileNum; j++) {
 			var base = -cubeSideLength / 2;
 			var elevationNum = elevationNums[i*tileNum + j];
 			var property = properties[i*tileNum + j];
 			var elevation = (-sign*base) + (-sign*elevationNum * 0.2);
+			
+			if (property == 'hole') {
+				elevations.push(50.0);
+				continue;
+			} 
 			elevations.push(elevation);
-
+			
 			var v1 = [], v2 = [], v3 = [], v4 = [];
 			var normalVec = [];
 			v1.push(base + i*tileLength);
@@ -191,12 +197,13 @@ function createFace(sign, num)
 			textureCoords.push(1.0);
 			textureCoords.push(1.0);
 			
-			mapVertexIndices.push((i*tileNum + j)*4);
-			mapVertexIndices.push((i*tileNum + j)*4+1);
-			mapVertexIndices.push((i*tileNum + j)*4+3);
-			mapVertexIndices.push((i*tileNum + j)*4);
-			mapVertexIndices.push((i*tileNum + j)*4+3);
-			mapVertexIndices.push((i*tileNum + j)*4+2);
+			mapVertexIndices.push(counter*4);
+			mapVertexIndices.push(counter*4+1);
+			mapVertexIndices.push(counter*4+3);
+			mapVertexIndices.push(counter*4);
+			mapVertexIndices.push(counter*4+3);
+			mapVertexIndices.push(counter*4+2);
+			counter += 1;
 			
 			if (property == 'tree') {
 				specObjPos.push([base + i*tileLength + tileLength/2, elevation, base + j*tileLength + tileLength/2]);
@@ -204,9 +211,9 @@ function createFace(sign, num)
 				specObjRotAxis.push([0, 1, 0]);
 				//elevations.push(-sign*base + (-sign*9*0.2));	//make that tile non-platformable				
 			} else if (property == 'pole') {
-				
-			} else if (property == 'hole') {
-				
+				specObjPos.push([elevation, base + i*tileLength + tileLength/2, base + j*tileLength + tileLength/2]);
+				specObjRotAngle.push(90);
+				specObjRotAxis.push([0, 0, 1]);				
 			}
 		}
 	}
@@ -215,25 +222,25 @@ function createFace(sign, num)
 	gl.bindBuffer(gl.ARRAY_BUFFER, mapBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 	mapBuffer.itemSize = 3;
-	mapBuffer.numItems = tileNum * tileNum * 4;
+	mapBuffer.numItems = counter * 4;
 	
 	var mapNormalBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, mapNormalBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
 	mapNormalBuffer.itemSize = 3;
-	mapBuffer.numItems = tileNum * tileNum * 4;
+	mapBuffer.numItems = counter * 4;
 
 	var mapTextureBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
 	mapTextureBuffer.itemSize = 2;
-	mapTextureBuffer.numItems = tileNum * tileNum * 4;
+	mapTextureBuffer.numItems = counter * 4;
 	
 	var mapVertexIndexBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mapVertexIndices), gl.STATIC_DRAW);
 	mapVertexIndexBuffer.itemSize = 1;
-	mapVertexIndexBuffer.numItems = tileNum * tileNum * 6;
+	mapVertexIndexBuffer.numItems = counter * 6;
 	
 	mapPositionStack.push(mapBuffer);
 	mapNormalStack.push(mapNormalBuffer);
@@ -308,6 +315,7 @@ function createSidingHelper(v1, v2, v3, v4, ind, sign, normSign, counter, ground
 
 function createSiding(sign, ind) {
 	var groundElevations = elevationStack[ind];
+	var properties = mapPropertyStack[ind];
 	var vertices = [];
 	var normals = [];
 	var textureCoords = [];
@@ -316,6 +324,8 @@ function createSiding(sign, ind) {
 	var base = -cubeSideLength / 2;
 	for (var i = 0; i < tileNum; i++) {
 		for (var j = 0; j < tileNum; j++) {
+			if (properties[i*tileNum + j] == 'hole')
+				continue;
 			if (i > 0 && -sign*(groundElevations[i*tileNum+j] - groundElevations[(i-1)*tileNum+j]) > 0) {
 				var v1 = [], v2 = [], v3 = [], v4 = [];
 				v1.push(base + i*tileLength);
@@ -517,6 +527,14 @@ function drawMap()
 				treePos[1] += offset;
 				drawCylinder(specObjPos[j], specObjRotAngle[j], specObjRotAxis[j], [0.5, 2, 0.5], 12);
 				drawCone(treePos, specObjRotAngle[j], specObjRotAxis[j], [2, 2, 2], 12);
+			} else if (i == 1) {	//pole
+				var polePos = specObjPos[j].slice(0);
+				var offset = 1.0;
+				polePos[0] += offset;
+				//var rot = [0, 0, 0]
+				//drawCylinder(specObjPos[j], 0, specObjRotAxis[j], [1.0, 1.0, 1.0], 12);
+				// todo: fix cylinder
+				drawSphere(polePos, specObjRotAngle[j], specObjRotAxis[j], [1, 1, 1], 12);
 			}
 		}
 	}

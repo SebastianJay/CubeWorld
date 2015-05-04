@@ -19,6 +19,10 @@ function createCollectibles()
 		var base = -cubeSideLength / 2;
 		var ind1 = randInt(5, 16);
 		var ind2 = randInt(5, 16);
+		while (mapPropertyStack[i][ind1*tileNum + ind2] != '') {
+			ind1 = randInt(5, 16);
+			ind2 = randInt(5, 16);			
+		}
 		var hpos = elevations[ind1*tileNum + ind2];
 		var sign = 1;
 		var collectHeight = 1.0;
@@ -49,7 +53,7 @@ function drawCollectibles() {
 		if (collectFound[i])
 			continue;
 		
-		var radRatio = collectRadius / sphereRadius;
+		var radRatio = collectRadius / sphereRadius / 1.3;
 		drawSphere(collectWorldPosStack[i], collectWorldRotAngleStack[i], collectWorldRotAxisStack[i], [radRatio, radRatio, radRatio], 12+i);
 	}
 }

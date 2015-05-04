@@ -287,11 +287,15 @@ function drawSolidHelper(posBuffer, normBuffer, texBuffer, vertexIndexBuffer,
 						translateVec, rotateAngle, rotateVec, scaleVec, tex_ind) {
 	var localMat = mat4.create();
 	mat4.identity(localMat);
+	
 	mat4.translate(localMat, translateVec);
-	mat4.scale(localMat, scaleVec);
 	mat4.rotate(localMat, degToRad(rotateAngle), rotateVec);
+	mat4.scale(localMat, scaleVec);
+
 	mvPushMatrix();
+
 	mat4.multiply(mvMatrix, localMat, mvMatrix);
+	//mat4.multiply(localMat, mvMatrix, mvMatrix);
 	
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, textureStack[tex_ind]);
