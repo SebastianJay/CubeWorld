@@ -19,6 +19,7 @@ function createCollectibles()
 		var base = -cubeSideLength / 2;
 		var ind1 = randInt(5, 16);
 		var ind2 = randInt(5, 16);
+		//todo: fix logic
 		while (mapPropertyStack[i][ind1*tileNum + ind2] != '') {
 			ind1 = randInt(5, 16);
 			ind2 = randInt(5, 16);			

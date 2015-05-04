@@ -29,6 +29,8 @@ var mapPropertyStack = [];
 var treeProb = 0.07;
 var poleProb = 0.02;
 var holeProb = 0.2;
+var fireProb = 0.3;
+var waterProb = 0.4;
 
 function randInt(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
@@ -99,6 +101,14 @@ function createFace(sign, num)
 					if (Math.random() <= poleProb) {
 						property = 'pole';
 					}				
+				} else if (num == 4) {
+					if (Math.random() <= fireProb) {
+						property = 'fire';
+					}
+				} else if (num == 5) {
+					if (Math.random() <= waterProb) {
+						property = 'water';
+					}
 				}
 			}
 			elevationNums.push(elevationNum);
@@ -134,6 +144,7 @@ function createFace(sign, num)
 	
 	//now create buffers
 	var counter = 0;
+	var specCounter = 0;
 	for (var i = 0; i < tileNum; i++) {
 		for (var j = 0; j < tileNum; j++) {
 			var base = -cubeSideLength / 2;
@@ -180,30 +191,48 @@ function createFace(sign, num)
 			}
 			var allverts = v1.concat(v2).concat(v3).concat(v4);
 			var allnorms = normalVec.concat(normalVec, normalVec, normalVec);
+			
+			var posVec, normVec, texVec, indexVec, currentcount;
+			if (property == 'fire' || property == 'water') {
+				posVec = specPosition;
+				normVec = specNormals;
+				texVec = specTextureCoords;
+				indexVec = specVertexIndices;
+				currentcount = specCounter;
+			} else {
+				posVec = vertices;
+				normVec = normals;
+				texVec = textureCoords;
+				indexVec = mapVertexIndices;
+				currentcount = counter;
+			}			
+
 			for (var k = 0; k < allverts.length; k++)
-				vertices.push(allverts[k]);
+				posVec.push(allverts[k]);
 			for (var k = 0; k < allnorms.length; k++)
-				normals.push(allnorms[k]);
+				normVec.push(allnorms[k]);
+				
+			texVec.push(0.0);
+			texVec.push(0.0);
+			texVec.push(1.0);
+			texVec.push(0.0);
+			texVec.push(0.0);
+			texVec.push(1.0);
+			texVec.push(1.0);
+			texVec.push(1.0);
 			
-			textureCoords.push(0.0);
-			textureCoords.push(0.0);
-			
-			textureCoords.push(1.0);
-			textureCoords.push(0.0);
+			indexVec.push(currentcount*4);
+			indexVec.push(currentcount*4+1);
+			indexVec.push(currentcount*4+3);
+			indexVec.push(currentcount*4);
+			indexVec.push(currentcount*4+3);
+			indexVec.push(currentcount*4+2);
 
-			textureCoords.push(0.0);
-			textureCoords.push(1.0);
-
-			textureCoords.push(1.0);
-			textureCoords.push(1.0);
-			
-			mapVertexIndices.push(counter*4);
-			mapVertexIndices.push(counter*4+1);
-			mapVertexIndices.push(counter*4+3);
-			mapVertexIndices.push(counter*4);
-			mapVertexIndices.push(counter*4+3);
-			mapVertexIndices.push(counter*4+2);
-			counter += 1;
+			if (property == 'fire' || property == 'water') {
+				specCounter += 1;
+			} else {
+				counter += 1;
+			}
 			
 			if (property == 'tree') {
 				specObjPos.push([base + i*tileLength + tileLength/2, elevation, base + j*tileLength + tileLength/2]);
@@ -228,7 +257,7 @@ function createFace(sign, num)
 	gl.bindBuffer(gl.ARRAY_BUFFER, mapNormalBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
 	mapNormalBuffer.itemSize = 3;
-	mapBuffer.numItems = counter * 4;
+	mapNormalBuffer.numItems = counter * 4;
 
 	var mapTextureBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
@@ -249,11 +278,35 @@ function createFace(sign, num)
 
 	elevationStack.push(elevations);	
 	mapPropertyStack.push(properties);
-	if (specPosition.length > 0) {
-		specialPositionStack.push(specPosition);
-		specialNormalStack.push(specNormals);
-		specialTextureStack.push(specTextureCoords);
-		specialVertexIndexStack.push(specVertexIndices);
+	if (specCounter > 0) {
+		var specMapBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, specMapBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(specPosition), gl.STATIC_DRAW);
+		specMapBuffer.itemSize = 3;
+		specMapBuffer.numItems = specCounter * 4;
+		
+		var specNormalBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, specNormalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(specNormals), gl.STATIC_DRAW);
+		specNormalBuffer.itemSize = 3;
+		specNormalBuffer.numItems = specCounter * 4;
+
+		var specTextureBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, specTextureBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(specTextureCoords), gl.STATIC_DRAW);
+		specTextureBuffer.itemSize = 2;
+		specTextureBuffer.numItems = specCounter * 4;
+		
+		var specVertexIndexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, specVertexIndexBuffer);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(specVertexIndices), gl.STATIC_DRAW);
+		specVertexIndexBuffer.itemSize = 1;
+		specVertexIndexBuffer.numItems = specCounter * 6;
+		
+		specialPositionStack.push(specMapBuffer);
+		specialNormalStack.push(specNormalBuffer);
+		specialTextureStack.push(specTextureBuffer);
+		specialVertexIndexStack.push(specVertexIndexBuffer);
 	}
 	if (specObjPos.length > 0) {
 		specialWorldPosStack.push(specObjPos);
@@ -320,7 +373,14 @@ function createSiding(sign, ind) {
 	var normals = [];
 	var textureCoords = [];
 	var vertexIndices = [];
+	
+	var specPosition = [];
+	var specNormals = [];
+	var specTextureCoords = [];
+	var specVertexIndices = [];
+	
 	var counter = 0;
+	var specCounter = 0;
 	var base = -cubeSideLength / 2;
 	for (var i = 0; i < tileNum; i++) {
 		for (var j = 0; j < tileNum; j++) {
@@ -337,9 +397,15 @@ function createSiding(sign, ind) {
 				v4.push(base + i*tileLength);
 				v4.push(base + j*tileLength);				
 
-				createSidingHelper(v1,v2,v3,v4, ind, sign, -1.0, counter, groundElevations[i*tileNum + j],
-						vertices, normals, textureCoords, vertexIndices);
-				counter += 1;
+				if (properties[i*tileNum + j] == 'fire' || properties[i*tileNum + j] == 'water') {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, -1.0, specCounter, groundElevations[i*tileNum + j],
+							specPosition, specNormals, specTextureCoords, specVertexIndices);
+					specCounter += 1;
+				} else {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, -1.0, counter, groundElevations[i*tileNum + j],
+							vertices, normals, textureCoords, vertexIndices);
+					counter += 1;
+				}
 			}
 			if (i < tileNum-1 && -sign*(groundElevations[i*tileNum+j] - groundElevations[(i+1)*tileNum+j]) > 0) {
 				var v1 = [], v2 = [], v3 = [], v4 = [];
@@ -352,9 +418,15 @@ function createSiding(sign, ind) {
 				v4.push(base + (i+1)*tileLength);
 				v4.push(base + j*tileLength);
 				
-				createSidingHelper(v1,v2,v3,v4, ind, sign, 1.0, counter, groundElevations[i*tileNum + j],
-						vertices, normals, textureCoords, vertexIndices);
-				counter += 1;
+				if (properties[i*tileNum + j] == 'fire' || properties[i*tileNum + j] == 'water') {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, 1.0, specCounter, groundElevations[i*tileNum + j],
+							specPosition, specNormals, specTextureCoords, specVertexIndices);
+					specCounter += 1;
+				} else {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, 1.0, counter, groundElevations[i*tileNum + j],
+							vertices, normals, textureCoords, vertexIndices);
+					counter += 1;
+				}
 			}
 			if (j > 0 && -sign*(groundElevations[i*tileNum+j] - groundElevations[i*tileNum+j-1]) > 0) {
 				var v1 = [], v2 = [], v3 = [], v4 = [];
@@ -367,9 +439,15 @@ function createSiding(sign, ind) {
 				v4.push(base + i*tileLength);
 				v4.push(base + j*tileLength);
 
-				createSidingHelper(v1,v2,v3,v4, ind, sign, -1.0, counter, groundElevations[i*tileNum + j],
-						vertices, normals, textureCoords, vertexIndices);
-				counter += 1;
+				if (properties[i*tileNum + j] == 'fire' || properties[i*tileNum + j] == 'water') {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, -1.0, specCounter, groundElevations[i*tileNum + j],
+							specPosition, specNormals, specTextureCoords, specVertexIndices);
+					specCounter += 1;
+				} else {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, -1.0, counter, groundElevations[i*tileNum + j],
+							vertices, normals, textureCoords, vertexIndices);
+					counter += 1;
+				}
 			}
 			if (j < tileNum-1 && -sign*(groundElevations[i*tileNum+j] - groundElevations[i*tileNum+j+1]) > 0) {
 				var v1 = [], v2 = [], v3 = [], v4 = [];
@@ -382,9 +460,15 @@ function createSiding(sign, ind) {
 				v4.push(base + i*tileLength);
 				v4.push(base + (j+1)*tileLength);
 
-				createSidingHelper(v1,v2,v3,v4, ind, sign, 1.0, counter, groundElevations[i*tileNum + j],
-						vertices, normals, textureCoords, vertexIndices);
-				counter += 1;
+				if (properties[i*tileNum + j] == 'fire' || properties[i*tileNum + j] == 'water') {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, 1.0, specCounter, groundElevations[i*tileNum + j],
+							specPosition, specNormals, specTextureCoords, specVertexIndices);
+					specCounter += 1;
+				} else {
+					createSidingHelper(v1,v2,v3,v4, ind, sign, 1.0, counter, groundElevations[i*tileNum + j],
+							vertices, normals, textureCoords, vertexIndices);
+					counter += 1;
+				}
 			}
 		}
 	}
@@ -420,6 +504,37 @@ function createSiding(sign, ind) {
 	sidingNormalStack.push(sidingNormalBuffer);
 	sidingTextureStack.push(sidingTextureBuffer);
 	sidingVertexIndexStack.push(sidingVertexIndexBuffer);
+	
+	if (specCounter > 0) {
+		var specMapBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, specMapBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(specPosition), gl.STATIC_DRAW);
+		specMapBuffer.itemSize = 3;
+		specMapBuffer.numItems = specCounter * 4;
+		
+		var specNormalBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, specNormalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(specNormals), gl.STATIC_DRAW);
+		specNormalBuffer.itemSize = 3;
+		specNormalBuffer.numItems = specCounter * 4;
+
+		var specTextureBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, specTextureBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(specTextureCoords), gl.STATIC_DRAW);
+		specTextureBuffer.itemSize = 2;
+		specTextureBuffer.numItems = specCounter * 4;
+		
+		var specVertexIndexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, specVertexIndexBuffer);
+		gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(specVertexIndices), gl.STATIC_DRAW);
+		specVertexIndexBuffer.itemSize = 1;
+		specVertexIndexBuffer.numItems = specCounter * 6;
+		
+		specialPositionStack.push(specMapBuffer);
+		specialNormalStack.push(specNormalBuffer);
+		specialTextureStack.push(specTextureBuffer);
+		specialVertexIndexStack.push(specVertexIndexBuffer);
+	}
 }
 
 function prepMatrixTransforms()
@@ -456,6 +571,32 @@ function prepMatrixTransforms()
 	mat4.translate(mvMatrix, [-xPos, -yPos, -zPos]);
 }
 
+
+function drawMapBuffersHelper(mapBuffer, mapNormalBuffer, mapTextureBuffer, mapVertexIndexBuffer, tex_ind) 
+{
+	gl.bindBuffer(gl.ARRAY_BUFFER, mapBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mapBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, mapNormalBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, mapNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
+	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mapTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, textureStack[tex_ind]);
+	gl.uniform1i(shaderProgram.samplerUniform, 0);
+	
+	gl.uniform1i(shaderProgram.useLightingUniform, true);
+	gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
+	gl.uniform3fv(shaderProgram.lightingDirectionUniform, dirLightDirectionFlat);
+	gl.uniform3fv(shaderProgram.directionalColorUniform, dirLightColorFlat);
+	gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
+	gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
+	
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
+	setMatrixUniforms();
+	gl.drawElements(gl.TRIANGLES, mapVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
 function drawMap() 
 {	
 	for (var i = 0; i < mapPositionStack.length; i++) {
@@ -463,28 +604,7 @@ function drawMap()
 		var mapNormalBuffer = mapNormalStack[i];
 		var mapTextureBuffer = mapTextureStack[i];
 		var mapVertexIndexBuffer = mapVertexIndexStack[i];
-		
-		gl.bindBuffer(gl.ARRAY_BUFFER, mapBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mapBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.bindBuffer(gl.ARRAY_BUFFER, mapNormalBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, mapNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.bindBuffer(gl.ARRAY_BUFFER, mapTextureBuffer);
-		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mapTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, textureStack[i]);
-		gl.uniform1i(shaderProgram.samplerUniform, 0);
-		
-		gl.uniform1i(shaderProgram.useLightingUniform, true);
-		gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, dirLightDirectionFlat);
-		gl.uniform3fv(shaderProgram.directionalColorUniform, dirLightColorFlat);
-		gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
-		gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
-		
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mapVertexIndexBuffer);
-		setMatrixUniforms();
-		gl.drawElements(gl.TRIANGLES, mapVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		drawMapBuffersHelper(mapBuffer, mapNormalBuffer, mapTextureBuffer, mapVertexIndexBuffer, i);
 	}
 	
 	for (var i = 0; i < sidingPositionStack.length; i++) {
@@ -492,27 +612,25 @@ function drawMap()
 		var sidingNormalBuffer = sidingNormalStack[i];
 		var sidingTextureBuffer = sidingTextureStack[i];
 		var sidingVertexIndexBuffer = sidingVertexIndexStack[i];
+		drawMapBuffersHelper(sidingBuffer, sidingNormalBuffer, sidingTextureBuffer, sidingVertexIndexBuffer, i+6);
+	}
+	
+	for (var i = 0; i < specialPositionStack.length; i++) {
+		var tex_ind = 0;
+		if (i == 0)
+			tex_ind = 20;
+		else if (i == 1)
+			tex_ind = 18;
+		else if (i == 2)
+			tex_ind = 21;
+		else if (i == 3)
+			tex_ind = 19;
 		
-		gl.bindBuffer(gl.ARRAY_BUFFER, sidingBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, sidingBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.bindBuffer(gl.ARRAY_BUFFER, sidingNormalBuffer);
-		gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, sidingNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.bindBuffer(gl.ARRAY_BUFFER, sidingTextureBuffer);
-		gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, sidingTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_2D, textureStack[i+6]);
-		gl.uniform1i(shaderProgram.samplerUniform, 0);
-		
-		gl.uniform1i(shaderProgram.useLightingUniform, true);
-		gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
-		gl.uniform3fv(shaderProgram.lightingDirectionUniform, dirLightDirectionFlat);
-		gl.uniform3fv(shaderProgram.directionalColorUniform, dirLightColorFlat);
-		gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
-		gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
-		
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sidingVertexIndexBuffer);
-		setMatrixUniforms();
-		gl.drawElements(gl.TRIANGLES, sidingVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+		var mapBuffer = specialPositionStack[i];
+		var mapNormalBuffer = specialNormalStack[i];
+		var mapTextureBuffer = specialTextureStack[i];
+		var mapVertexIndexBuffer = specialVertexIndexStack[i];
+		drawMapBuffersHelper(mapBuffer, mapNormalBuffer, mapTextureBuffer, mapVertexIndexBuffer, tex_ind);
 	}
 	
 	for (var i = 0; i < specialWorldPosStack.length; i++) {
@@ -525,8 +643,8 @@ function drawMap()
 				var treePos = specObjPos[j].slice(0);
 				var offset = 1.0;
 				treePos[1] += offset;
-				drawCylinder(specObjPos[j], specObjRotAngle[j], specObjRotAxis[j], [0.5, 2, 0.5], 12);
-				drawCone(treePos, specObjRotAngle[j], specObjRotAxis[j], [2, 2, 2], 12);
+				drawCylinder(specObjPos[j], specObjRotAngle[j], specObjRotAxis[j], [0.5, 2, 0.5], 22);
+				drawCone(treePos, specObjRotAngle[j], specObjRotAxis[j], [2, 2, 2], 23);
 			} else if (i == 1) {	//pole
 				var polePos = specObjPos[j].slice(0);
 				var offset = 1.0;
@@ -534,7 +652,7 @@ function drawMap()
 				//var rot = [0, 0, 0]
 				//drawCylinder(specObjPos[j], 0, specObjRotAxis[j], [1.0, 1.0, 1.0], 12);
 				// todo: fix cylinder
-				drawSphere(polePos, specObjRotAngle[j], specObjRotAxis[j], [1, 1, 1], 12);
+				drawSphere(polePos, specObjRotAngle[j], specObjRotAxis[j], [1, 1, 1], 25);
 			}
 		}
 	}

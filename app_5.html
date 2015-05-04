@@ -167,16 +167,16 @@
 		'shadow_tile.png',
 		'metal_tile.png',
 		'earth_tile.png',
-		'fire_tile.png',
-		'water_tile.png',
+		'fire_floor_tile.png',
+		'sand_tile.png',
 	];
 	var sidingTextureFilenames = [
 		'grass_tile_side.png',
 		'shadow_tile_side.png',
 		'metal_tile_side.png',
 		'earth_tile_side.png',
-		'fire_tile.png',
-		'water_tile.png',
+		'fire_floor_tile.png',
+		'sand_tile_side.png',
 	];
 	var collectTextureFilenames = [
 		'green_collect.png',
@@ -187,7 +187,14 @@
 		'blue_collect.png',
 	];
 	var specialTextureFilenames = [
-		
+		'water_tile.png',
+		'water_tile_side.png',
+		'fire_tile.png',
+		'fire_tile_side.png',
+		'tree_trunk.png',
+		'tree_cover.png',
+		'pole_trunk.png',
+		'pole_head.png',
 	];
 	
 	function loadImage(url, callback) {
@@ -422,7 +429,7 @@
         initShaders();
         initBuffers();
 		var allFilenames = groundTextureFilenames.concat(sidingTextureFilenames)
-			.concat(collectTextureFilenames);
+			.concat(collectTextureFilenames).concat(specialTextureFilenames);
 		loadImages(allFilenames, initTextures);
         //initTextures();
 
