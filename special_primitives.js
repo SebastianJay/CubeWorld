@@ -184,11 +184,11 @@ function createCylinder()
 	cylinderPositionBuffer.itemSize = 3;
 	cylinderPositionBuffer.numItems = vertexPositionData.length / 3;
 
-	cylinderIndexBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderIndexBuffer);
+	cylinderVertexIndexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderVertexIndexBuffer);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STATIC_DRAW);
-	cylinderIndexBuffer.itemSize = 1;
-	cylinderIndexBuffer.numItems = indexData.length;	
+	cylinderVertexIndexBuffer.itemSize = 1;
+	cylinderVertexIndexBuffer.numItems = indexData.length;	
 }
 
 function createCone()
@@ -287,8 +287,8 @@ function drawSolidHelper(posBuffer, normBuffer, texBuffer, vertexIndexBuffer,
 						translateVec, rotateAngle, rotateVec, scaleVec, tex_ind) {
 	var localMat = mat4.create();
 	mat4.identity(localMat);
-	mat4.scale(localMat, scaleVec);
 	mat4.translate(localMat, translateVec);
+	mat4.scale(localMat, scaleVec);
 	mat4.rotate(localMat, degToRad(rotateAngle), rotateVec);
 	mvPushMatrix();
 	mat4.multiply(mvMatrix, localMat, mvMatrix);

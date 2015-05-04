@@ -7,12 +7,28 @@ var mapPositionStack = [];
 var mapNormalStack = [];
 var mapTextureStack = [];
 var mapVertexIndexStack = [];
-var elevationStack = [];
 
 var sidingPositionStack = [];
 var sidingNormalStack = [];
 var sidingTextureStack = [];
 var sidingVertexIndexStack = [];
+
+//for tiles on the map which are non-standard
+var specialPositionStack = [];
+var specialNormalStack = [];
+var specialTextureStack = [];
+var specialVertexIndexStack = [];
+
+//for objects on the map which are non-standard
+var specialWorldPosStack = [];
+var specialWorldRotAngleStack = [];
+var specialWorldRotAxisStack = [];
+
+var elevationStack = [];
+var mapPropertyStack = [];
+var treeProb = 0.07;
+var poleProb = 0.02;
+var holeProb = 0.2;
 
 function randInt(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;
@@ -42,18 +58,89 @@ function createFace(sign, num)
 	var textureCoords = [];
 	var mapVertexIndices = [];
 	var normals = [];
+	var elevationNums = [];
+	var properties = [];
 	var elevations = [];
+	
+	var specPosition = [];
+	var specNormals = [];
+	var specTextureCoords = [];
+	var specVertexIndices = [];
+	
+	var specObjPos = [];
+	var specObjRotAngle = [];
+	var specObjRotAxis = [];
+	
+	//first create terrain
 	for (var i = 0; i < tileNum; i++) {
 		for (var j = 0; j < tileNum; j++) {
 			var elevationNum; 
-			if (i > 0 && j > 0 && i < tileNum-1 && j < tileNum-1)
-				elevationNum = randInt(-2, 3);
+			if (i > 0 && j > 0 && i < tileNum-1 && j < tileNum-1) {
+				if (num == 3) {
+					elevationNum = randInt(-5, 6);	//earth stage is hilly
+				} else {
+					elevationNum = randInt(-2, 3);
+				}
+			}
 			else
 				elevationNum = 0;
-			var base = -cubeSideLength / 2;
-			var elevation = -sign*base + elevationNum * 0.2;
-			elevations.push(elevation);
+
+			var property = '';
+			if (i > 0 && j > 0 && i < tileNum-1 && j < tileNum-1) {			
+				if (num == 0) {
+					if (Math.random() <= treeProb) { 
+						property = 'tree';
+					}
+				} else if (num == 1) {
+					if (Math.random() <= holeProb) {
+						property = 'hole';
+					}
+				} else if (num == 2) {
+					if (Math.random() <= poleProb) {
+						property = 'pole';
+					}				
+				}
+			}
+			elevationNums.push(elevationNum);
+			properties.push(property);
+		}
+	}
+	
+	//make sure no traps are present
+	for (var i = 1; i < tileNum-1; i++) {
+		for (var j = 1; j < tileNum-1; j++) {
+			var property = properties[i*tileNum + j];
+			var elevationNum = elevationNums[i*tileNum + j];
+			if (property == 'tree' || property == 'pole') continue;
+				
+			var el0 = elevationNums[i*tileNum + j - 1];
+			if (properties[i*tileNum + j - 1] == 'tree' || properties[i*tileNum + j - 1] == 'pole')	el0 = 9;
 			
+			var el1 = elevationNums[i*tileNum + j + 1];
+			if (properties[i*tileNum + j + 1] == 'tree' || properties[i*tileNum + j + 1] == 'pole') el1 = 9;
+
+			var el2 = elevationNums[(i-1)*tileNum + j];
+			if (properties[(i-1)*tileNum + j] == 'tree' || properties[(i-1)*tileNum + j] == 'pole') el2 = 9;
+
+			var el3 = elevationNums[(i+1)*tileNum + j];
+			if (properties[(i+1)*tileNum + j] == 'tree' || properties[(i+1)*tileNum + j] == 'pole')	el3 = 9;
+
+			var minel = Math.min(el0, el1, el2, el3);
+			if (elevationNum < minel - 2)
+				elevationNum = minel - 2;
+			elevationNums[i*tileNum + j] = elevationNum;
+		}
+	}	
+	
+	//now create buffers
+	for (var i = 0; i < tileNum; i++) {
+		for (var j = 0; j < tileNum; j++) {
+			var base = -cubeSideLength / 2;
+			var elevationNum = elevationNums[i*tileNum + j];
+			var property = properties[i*tileNum + j];
+			var elevation = (-sign*base) + (-sign*elevationNum * 0.2);
+			elevations.push(elevation);
+
 			var v1 = [], v2 = [], v3 = [], v4 = [];
 			var normalVec = [];
 			v1.push(base + i*tileLength);
@@ -110,6 +197,17 @@ function createFace(sign, num)
 			mapVertexIndices.push((i*tileNum + j)*4);
 			mapVertexIndices.push((i*tileNum + j)*4+3);
 			mapVertexIndices.push((i*tileNum + j)*4+2);
+			
+			if (property == 'tree') {
+				specObjPos.push([base + i*tileLength + tileLength/2, elevation, base + j*tileLength + tileLength/2]);
+				specObjRotAngle.push(0);
+				specObjRotAxis.push([0, 1, 0]);
+				//elevations.push(-sign*base + (-sign*9*0.2));	//make that tile non-platformable				
+			} else if (property == 'pole') {
+				
+			} else if (property == 'hole') {
+				
+			}
 		}
 	}
 	
@@ -141,7 +239,20 @@ function createFace(sign, num)
 	mapNormalStack.push(mapNormalBuffer);
 	mapTextureStack.push(mapTextureBuffer);
 	mapVertexIndexStack.push(mapVertexIndexBuffer);
-	elevationStack.push(elevations);
+
+	elevationStack.push(elevations);	
+	mapPropertyStack.push(properties);
+	if (specPosition.length > 0) {
+		specialPositionStack.push(specPosition);
+		specialNormalStack.push(specNormals);
+		specialTextureStack.push(specTextureCoords);
+		specialVertexIndexStack.push(specVertexIndices);
+	}
+	if (specObjPos.length > 0) {
+		specialWorldPosStack.push(specObjPos);
+		specialWorldRotAngleStack.push(specObjRotAngle);
+		specialWorldRotAxisStack.push(specObjRotAxis);
+	}
 }
 
 //lots of args... w/e
@@ -392,5 +503,21 @@ function drawMap()
 		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sidingVertexIndexBuffer);
 		setMatrixUniforms();
 		gl.drawElements(gl.TRIANGLES, sidingVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+	}
+	
+	for (var i = 0; i < specialWorldPosStack.length; i++) {
+		var specObjPos = specialWorldPosStack[i];
+		var specObjRotAngle = specialWorldRotAngleStack[i];
+		var specObjRotAxis = specialWorldRotAxisStack[i];
+		for (var j = 0; j < specObjPos.length; j++) {
+			//hard coding ftw
+			if (i == 0) {	//tree
+				var treePos = specObjPos[j].slice(0);
+				var offset = 1.0;
+				treePos[1] += offset;
+				drawCylinder(specObjPos[j], specObjRotAngle[j], specObjRotAxis[j], [0.5, 2, 0.5], 12);
+				drawCone(treePos, specObjRotAngle[j], specObjRotAxis[j], [2, 2, 2], 12);
+			}
+		}
 	}
 }
