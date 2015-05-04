@@ -30,7 +30,7 @@ var treeProb = 0.07;
 var poleProb = 0.02;
 var holeProb = 0.2;
 var fireProb = 0.3;
-var waterProb = 0.4;
+var waterProb = 0.5;
 
 function randInt(min, max) {
 	return Math.floor(Math.random() * (max - min)) + min;

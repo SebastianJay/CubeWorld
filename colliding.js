@@ -84,6 +84,11 @@ function checkCollisionGravity(xpos1, ypos1, zpos1) {
 	}
 	
 	if (flag) {
+		if (properties[i*tileNum + j] == 'fire') {
+			healthPoints -= 1.3;
+		} else if (properties[i*tileNum + j] == 'water') {
+			healthPoints -= 0.7;
+		}
 		if (gravY < 0)
 			return [false, xpos1, groundElevations[i*tileNum+j]+height, zpos1];
 		if (gravY > 0)
@@ -326,4 +331,3 @@ function checkGravitySwitch() {
 		}
 	}	
 }
-

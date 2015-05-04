@@ -307,6 +307,8 @@
 	var jumpInit = 0.007;
 	var jumpVel = 0.0;
 	
+	var healthPoints = 100.0;
+	
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -317,9 +319,34 @@
 		drawCollectibles();
     }
 
-
+	var deathAlertSent = false;
+	var winAlertSent = false;
+	function checkEndgame()
+	{
+		if (xPos < -cubeSideLength || yPos < -cubeSideLength || zPos < -cubeSideLength
+			|| xPos > cubeSideLength || yPos > cubeSideLength || zPos > cubeSideLength || healthPoints <= 0)
+		{
+			if (!deathAlertSent)
+			{
+				alert("You died. =(");
+				deathAlertSent = true;
+			}
+		}
+		if (collectiblesRemaining == 0)
+		{
+			if (!winAlertSent)
+			{
+				if (deathAlertSent) {
+					alert("You won (albeit as a zombie).");
+				} else {
+					alert("You won. Good job, champ!");
+				}
+				winAlertSent = true;
+			}
+		}
+	}
+	
     var lastTime = 0;
-
     function animate() {
         var timeNow = new Date().getTime();
         if (lastTime != 0) {
@@ -417,6 +444,8 @@
 			}
 			
 			checkCollisionCollectibles();
+			checkEndgame();
+			healthLabel.innerHTML = ""+Math.floor(healthPoints);
         }
         lastTime = timeNow;
     }
@@ -429,9 +458,10 @@
         animate();
     }
 
-
+	var healthLabel;
     function webGLStart() {
         var canvas = document.getElementById("gl-canvas");
+		healthLabel = document.getElementById("health_text");
         initGL(canvas);
         initShaders();
         initBuffers();
@@ -458,6 +488,11 @@
 
 <body onload="webGLStart();">
     <canvas id="gl-canvas" style="border: none;" width="1280" height="720"></canvas>
+	<!--<p>Health (that I'm too lazy to overlay): 100</p>-->
+	<div id="health_text">100</div>
+	<!--
+	<div>Health I'm too lazy to overlay on the screen: <span id="health_text">100</span></div>
+	-->
 </body>
 
 </html>
