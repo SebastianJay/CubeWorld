@@ -289,6 +289,7 @@
 	var pitch = 0;
 	var yawRate = 0;
 	var pitchRate = 0;
+	var pitchLimit = 70;
 	var walkSpeed = 0;
 	var jumpReq = false;
 	var grounded = false;
@@ -368,8 +369,14 @@
             }
 			
             yaw += yawRate * elapsed;
-            pitch += pitchRate * elapsed;
-			
+			/*
+			if (pitch > -pitchLimit && pitch < pitchLimit) {
+				pitch = Math.max(Math.min(pitch + pitchRate * elapsed, pitchLimit), -pitchLimit);
+			}
+			*/
+			if ((pitchRate > 0 && pitch < pitchLimit) || (pitchRate < 0 && pitch > -pitchLimit))
+				pitch += pitchRate * elapsed;
+				
 			if (jumping) {
 				jumpVel -= elapsed * jumpMag;
 				if (jumpVel < 0) {

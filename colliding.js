@@ -257,9 +257,15 @@ function checkGravitySwitch() {
 	var end = cubeSideLength / 2;
 	if (gravY < 0 || gravY > 0) {
 		if (xPos < base + tileLength) {
+			if (gravY > 0) {
+				yaw += 180;
+			}
 			gravY = 0.0;
 			gravX = -1.0;
 		} else if (xPos > end - tileLength) {
+			if (gravY > 0) {
+				yaw += 180;
+			}
 			gravY = 0.0;
 			gravX = 1.0;
 		} else if (zPos < base + tileLength) {
@@ -276,18 +282,39 @@ function checkGravitySwitch() {
 		} else if (yPos > end - tileLength) {
 			gravX = 0.0;
 			gravY = 1.0;
+			yaw += 180;
 		} else if (zPos < base + tileLength) {
+			if (gravX > 0)	{
+				yaw += 90;
+			} else {
+				yaw -= 90;
+			}
 			gravX = 0.0;
 			gravZ = -1.0;
 		} else if (zPos > end - tileLength) {
+			if (gravX > 0)	{
+				yaw -= 90;
+			} else {
+				yaw += 90;
+			}		
 			gravX = 0.0;
 			gravZ = 1.0;
 		}
 	} else if (gravZ < 0 || gravZ > 0) {
 		if (xPos < base + tileLength) {
+			if (gravZ > 0)	{
+				yaw -= 90;
+			} else {
+				yaw += 90;
+			}
 			gravZ = 0.0;
 			gravX = -1.0;
 		} else if (xPos > end - tileLength) {
+			if (gravZ > 0)	{
+				yaw += 90;
+			} else {
+				yaw -= 90;
+			}
 			gravZ = 0.0;
 			gravX = 1.0;
 		} else if (yPos < base + tileLength) {
