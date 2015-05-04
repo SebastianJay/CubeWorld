@@ -1,4 +1,6 @@
 
+//adapted from learningwebgl lesson 11 on drawing spheres
+
 //webgl
 var cylinderPositionBuffer;
 var cylinderNormalBuffer;
@@ -10,6 +12,11 @@ var coneNormalBuffer;
 var coneVertexIndexBuffer;
 var coneTextureBuffer;
 
+var spherePositionBuffer;
+var sphereNormalBuffer;
+var sphereVertexIndexBuffer;
+var sphereTextureBuffer;
+
 //game-related
 var cylinderLongitudeBands = 30;
 var cylinderRadius = 1.0;
@@ -20,35 +27,100 @@ var coneLongitudeBands = 30;
 var coneRadius = 1.0;
 var coneHeight = 1.0;
 
+var sphereRadius = 1.0;
+var sphereLatitudeBands = 30;
+var sphereLongitudeBands = 30;
+
 function createSolids()
 {
+	createSphere();
 	createCylinder();
 	createCone();
 }
 
+function createSphere()
+{
+	var vertexPositionData = [];
+	var normalData = [];
+	var textureCoordData = [];
+		
+	for (var latNumber=0; latNumber <= sphereLatitudeBands; latNumber++) {
+		var theta = latNumber * Math.PI / sphereLatitudeBands;
+		var sinTheta = Math.sin(theta);
+		var cosTheta = Math.cos(theta);
+
+		for (var longNumber=0; longNumber <= sphereLongitudeBands; longNumber++) {
+			var phi = longNumber * 2 * Math.PI / sphereLongitudeBands;
+			var sinPhi = Math.sin(phi);
+			var cosPhi = Math.cos(phi);
+
+			var x = cosPhi * sinTheta;
+			var y = cosTheta;
+			var z = sinPhi * sinTheta;
+			var u = 1 - (longNumber / sphereLongitudeBands);
+			var v = 1 - (latNumber / sphereLatitudeBands);
+
+			normalData.push(x);
+			normalData.push(y);
+			normalData.push(z);
+			textureCoordData.push(u);
+			textureCoordData.push(v);
+			vertexPositionData.push(sphereRadius * x);
+			vertexPositionData.push(sphereRadius * y);
+			vertexPositionData.push(sphereRadius * z);			
+		}
+	}
+
+	var indexData = [];
+	for (var latNumber=0; latNumber < sphereLatitudeBands; latNumber++) {
+		for (var longNumber=0; longNumber < sphereLongitudeBands; longNumber++) {
+			var first = (latNumber * (sphereLongitudeBands + 1)) + longNumber;
+			var second = first + sphereLongitudeBands + 1;
+			indexData.push(first);
+			indexData.push(second);
+			indexData.push(first + 1);
+
+			indexData.push(second);
+			indexData.push(second + 1);
+			indexData.push(first + 1);
+		}
+	}
+
+	sphereNormalBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, sphereNormalBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normalData), gl.STATIC_DRAW);
+	sphereNormalBuffer.itemSize = 3;
+	sphereNormalBuffer.numItems = normalData.length / 3;
+
+	sphereTextureBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, sphereTextureBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordData), gl.STATIC_DRAW);
+	sphereTextureBuffer.itemSize = 2;
+	sphereTextureBuffer.numItems = textureCoordData.length / 2;
+
+	spherePositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPositionData), gl.STATIC_DRAW);
+	spherePositionBuffer.itemSize = 3;
+	spherePositionBuffer.numItems = vertexPositionData.length / 3;
+
+	sphereVertexIndexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STATIC_DRAW);
+	sphereVertexIndexBuffer.itemSize = 1;
+	sphereVertexIndexBuffer.numItems = indexData.length;
+}
+
+
 //creates open-ended cylinder
 function createCylinder()
 {
-	/*
-	var vertexPositionBuffer;
-    var vertexNormalBuffer;
-    var vertexTextureCoordBuffer;
-    var vertexIndexBuffer;
-	*/
-	
 	var vertexPositionData = [];
 	var normalData = [];
 	var textureCoordData = [];
 	var indexData = [];
-	
-/*	
-	var posVec = [xpos, ypos, zpos];
-	collectWorldPosStack.push(posVec);
-	collectFound.push(false);
-*/
 
 	//initial point
-	//var counter = 2;
 	var prevSinTheta = 0;
 	var prevCosTheta = 1;
 	normalData.push(prevCosTheta, 0, prevSinTheta);
@@ -57,15 +129,14 @@ function createCylinder()
 	textureCoordData.push(0, 1);
 	vertexPositionData.push(cylinderRadius * prevCosTheta, 0, cylinderRadius * prevSinTheta);
 	vertexPositionData.push(cylinderRadius * prevCosTheta, cylinderHeight, cylinderRadius * prevSinTheta);	
-	for (var longNumber=1; longNumber <= collectLongitudeBands; longNumber++) {
-		var theta = longNumber * 2 * Math.PI / collectLongitudeBands;
+	for (var longNumber=1; longNumber <= cylinderLongitudeBands; longNumber++) {
+		var theta = longNumber * 2 * Math.PI / cylinderLongitudeBands;
 		var sinTheta = Math.sin(theta);
 		var cosTheta = Math.cos(theta);
 
 		var x = cosTheta;
 		var z = sinTheta;
-		var u = (longNumber / collectLongitudeBands);
-		//var v = 1 - (latNumber / collectLatitudeBands);
+		var u = (longNumber / cylinderLongitudeBands);
 
 		normalData.push(cosTheta);
 		normalData.push(0);
@@ -93,24 +164,7 @@ function createCylinder()
 		
 		prevSinTheta = sinTheta;
 		prevCosTheta = cosTheta;
-		//counter += 2;
 	}
-
-	/*
-	for (var latNumber=0; latNumber < collectLatitudeBands; latNumber++) {
-		for (var longNumber=0; longNumber < collectLongitudeBands; longNumber++) {
-			var first = (latNumber * (collectLongitudeBands + 1)) + longNumber;
-			var second = first + collectLongitudeBands + 1;
-			indexData.push(first);
-			indexData.push(second);
-			indexData.push(first + 1);
-
-			indexData.push(second);
-			indexData.push(second + 1);
-			indexData.push(first + 1);
-		}
-	}
-	*/
 	
 	cylinderNormalBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, cylinderNormalBuffer);
@@ -134,14 +188,7 @@ function createCylinder()
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderIndexBuffer);
 	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indexData), gl.STATIC_DRAW);
 	cylinderIndexBuffer.itemSize = 1;
-	cylinderIndexBuffer.numItems = indexData.length;
-	
-	/*
-	collectPositionStack.push(vertexPositionBuffer);
-	collectNormalStack.push(vertexNormalBuffer);
-	collectTextureStack.push(vertexTextureCoordBuffer);
-	collectVertexIndexStack.push(vertexIndexBuffer);
-	*/
+	cylinderIndexBuffer.numItems = indexData.length;	
 }
 
 function createCone()
@@ -155,7 +202,7 @@ function createCone()
 		var midHeight = latNumber * coneHeight / coneLatitudeBands;
 		var midRadius = (coneHeight - midHeight) * coneRadius / coneHeight;
 		for (var longNumber=0; longNumber <= coneLongitudeBands; longNumber++) {
-			var theta = longNumber * 2 * Math.PI / collectLongitudeBands;
+			var theta = longNumber * 2 * Math.PI / coneLongitudeBands;
 			var sinTheta = Math.sin(theta);
 			var cosTheta = Math.cos(theta);
 
@@ -181,10 +228,10 @@ function createCone()
 		}
 	}
 
-	for (var latNumber=0; latNumber < collectLatitudeBands; latNumber++) {
-		for (var longNumber=0; longNumber < collectLongitudeBands; longNumber++) {
-			var first = (latNumber * (collectLongitudeBands + 1)) + longNumber;
-			var second = first + collectLongitudeBands + 1;
+	for (var latNumber=0; latNumber < coneLatitudeBands; latNumber++) {
+		for (var longNumber=0; longNumber < coneLongitudeBands; longNumber++) {
+			var first = (latNumber * (coneLongitudeBands + 1)) + longNumber;
+			var second = first + coneLongitudeBands + 1;
 			indexData.push(first);
 			indexData.push(second);
 			indexData.push(first + 1);
@@ -220,34 +267,24 @@ function createCone()
 	coneVertexIndexBuffer.numItems = indexData.length;	
 }
 
-function drawCylinder() {
-	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, textureStack[12]);
-	gl.uniform1i(shaderProgram.samplerUniform, 0);
+function drawSphere(translateVec, rotateAngle, rotateVec, scaleVec, tex_ind) {
+	drawSolidHelper(spherePositionBuffer, sphereNormalBuffer, sphereTextureBuffer, sphereVertexIndexBuffer,
+					translateVec, rotateAngle, rotateVec, scaleVec, tex_ind);
+}
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, cylinderPositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cylinderPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, cylinderTextureBuffer);
-	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, cylinderTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, cylinderNormalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, cylinderNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-	gl.uniform1i(shaderProgram.useLightingUniform, true);
-	gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
-	gl.uniform3fv(shaderProgram.lightingDirectionUniform, dirLightDirectionFlat);
-	gl.uniform3fv(shaderProgram.directionalColorUniform, dirLightColorFlat);
-	gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
-	gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
-	
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cylinderIndexBuffer);
-	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, cylinderIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);	
+function drawCylinder(translateVec, rotateAngle, rotateVec, scaleVec, tex_ind) {
+	drawSolidHelper(cylinderPositionBuffer, cylinderNormalBuffer, cylinderTextureBuffer, cylinderVertexIndexBuffer,
+					translateVec, rotateAngle, rotateVec, scaleVec, tex_ind);
 }
 
 
-function drawCone(translateVec, rotateAngle, rotateVec, scaleVec) {
+function drawCone(translateVec, rotateAngle, rotateVec, scaleVec, tex_ind) {
+	drawSolidHelper(conePositionBuffer, coneNormalBuffer, coneTextureBuffer, coneVertexIndexBuffer,
+					translateVec, rotateAngle, rotateVec, scaleVec, tex_ind);
+}
+
+function drawSolidHelper(posBuffer, normBuffer, texBuffer, vertexIndexBuffer, 
+						translateVec, rotateAngle, rotateVec, scaleVec, tex_ind) {
 	var localMat = mat4.create();
 	mat4.identity(localMat);
 	mat4.scale(localMat, scaleVec);
@@ -257,17 +294,17 @@ function drawCone(translateVec, rotateAngle, rotateVec, scaleVec) {
 	mat4.multiply(mvMatrix, localMat, mvMatrix);
 	
 	gl.activeTexture(gl.TEXTURE0);
-	gl.bindTexture(gl.TEXTURE_2D, textureStack[12]);
+	gl.bindTexture(gl.TEXTURE_2D, textureStack[tex_ind]);
 	gl.uniform1i(shaderProgram.samplerUniform, 0);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, conePositionBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, conePositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, posBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, coneTextureBuffer);
-	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, coneTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, texBuffer);
+	gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, texBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER, coneNormalBuffer);
-	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, coneNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	gl.bindBuffer(gl.ARRAY_BUFFER, normBuffer);
+	gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, normBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
 	gl.uniform1i(shaderProgram.useLightingUniform, true);
 	gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightFlat);
@@ -276,9 +313,9 @@ function drawCone(translateVec, rotateAngle, rotateVec, scaleVec) {
 	gl.uniform3fv(shaderProgram.pointLightingPositionUniform, pointLightPositionFlat);
 	gl.uniform3fv(shaderProgram.pointLightingColorUniform, pointLightColorFlat);
 	
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, coneVertexIndexBuffer);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 	setMatrixUniforms();
-	gl.drawElements(gl.TRIANGLES, coneVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);	
+	gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);	
 	
-	mvPopMatrix();
+	mvPopMatrix();	
 }

@@ -53,6 +53,7 @@
 
     void main(void) {
 		vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+		vec4 pointLightPos = uMVMatrix * vec4(uPointLightingPosition, 1.0);
         gl_Position = uPMatrix * mvPosition;
         vTextureCoord = aTextureCoord;
 
@@ -60,7 +61,7 @@
 			vLightWeighting = vec3(1.0, 1.0, 1.0);
 		} else {
 			vec3 transformedNormal = uNMatrix * aVertexNormal;
-			vec3 pointLightDir = normalize(uPointLightingPosition - mvPosition.xyz);
+			vec3 pointLightDir = normalize(pointLightPos.xyz - mvPosition.xyz);
 			float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
 			float pointLightWeighting = max(dot(transformedNormal, pointLightDir), 0.0);
 			vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting + uPointLightingColor * pointLightWeighting;
@@ -253,7 +254,7 @@
 		var normalMat = mat3.create();
 		var testMat = mat4.create();
 		mat4.identity(testMat);
-		mat4.toInverseMat3(testMat, normalMat);
+		mat4.toInverseMat3(mvMatrix, normalMat);
 		mat3.transpose(normalMat);
 		gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMat);
     }
@@ -264,9 +265,9 @@
     }
 
     function initBuffers() {		
+		createSolids();
 		createMap();
 		createCollectibles();
-		createCone();
 		createLights();
     }
 
@@ -303,7 +304,6 @@
 		prepMatrixTransforms();		
 		drawMap();
 		drawCollectibles();
-		drawCone([1, -10, 1], 0, [0, 0, 1], [1, 2, 1]);
     }
 
 
