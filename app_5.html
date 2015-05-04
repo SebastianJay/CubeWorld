@@ -12,6 +12,7 @@
 <script type="text/javascript" src="colliding.js"></script>
 <script type="text/javascript" src="collectibles.js"></script>
 <script type="text/javascript" src="lighting.js"></script>
+<script type="text/javascript" src="special_primitives.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -265,6 +266,7 @@
     function initBuffers() {		
 		createMap();
 		createCollectibles();
+		createCone();
 		createLights();
     }
 
@@ -301,6 +303,7 @@
 		prepMatrixTransforms();		
 		drawMap();
 		drawCollectibles();
+		drawCone([1, -10, 1], 0, [0, 0, 1], [1, 2, 1]);
     }
 
 
