@@ -84,23 +84,24 @@ function checkCollisionGravity(xpos1, ypos1, zpos1) {
 	}
 	
 	if (flag) {
+		var sign = 1;
+		if (gravY > 0 || gravX > 0 || gravZ > 0)
+			sign = -1;
+		var retHeight =  groundElevations[i*tileNum+j] + sign*height;
 		if (properties[i*tileNum + j] == 'fire') {
 			healthPoints -= 1.3;
 		} else if (properties[i*tileNum + j] == 'water') {
-			healthPoints -= 0.7;
+			//healthPoints -= 0.7;
+			//todo: 
+			if (gravZ < 0 || gravZ > 0)
+				retHeight = zPos - sign*0.03;
 		}
-		if (gravY < 0)
-			return [false, xpos1, groundElevations[i*tileNum+j]+height, zpos1];
-		if (gravY > 0)
-			return [false, xpos1, groundElevations[i*tileNum+j]-height, zpos1];
-		if (gravX < 0)
-			return [false, groundElevations[i*tileNum+j]+height, ypos1, zpos1];
-		if (gravX > 0)
-			return [false, groundElevations[i*tileNum+j]-height, ypos1, zpos1];
-		if (gravZ < 0)
-			return [false, xpos1, ypos1, groundElevations[i*tileNum+j]+height];
-		if (gravZ > 0)
-			return [false, xpos1, ypos1, groundElevations[i*tileNum+j]-height];		
+		if (gravY < 0 || gravY > 0)
+			return [false, xpos1, retHeight, zpos1];
+		if (gravX < 0 || gravX > 0)
+			return [false, retHeight, ypos1, zpos1];
+		if (gravZ < 0 || gravZ > 0)
+			return [false, xpos1, ypos1, retHeight];
 	}
 	return [true];
 }

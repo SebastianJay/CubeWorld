@@ -20,10 +20,10 @@ function handleKeyUp(event) {
 }
 
 function handleKeys() {
-	if (currentlyPressedKeys[33]) {
+	if (currentlyPressedKeys[33] || currentlyPressedKeys[81]) {
 		// Page Up
 		pitchRate = pitchRateMag;
-	} else if (currentlyPressedKeys[34]) {
+	} else if (currentlyPressedKeys[34] || currentlyPressedKeys[69]) {
 		// Page Down
 		pitchRate = -pitchRateMag;
 	} else {
@@ -50,7 +50,7 @@ function handleKeys() {
 		walkSpeed = 0;
 	}
 
-	if (currentlyPressedKeys[32]) {
+	if (currentlyPressedKeys[32] || currentlyPressedKeys[80]) {
 		jumpReq = true;
 	} else {
 		jumpReq = false;
