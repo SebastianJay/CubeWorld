@@ -7,7 +7,7 @@ The game makes use of buffers for pretty much all the rendering -- the ground an
 buffers (i.e. one for a sphere, one for a cylinder, and one for a cone) whose positions, rotations, and scales are transformed using matrix math. 
 There is also some point lighting to make the lips of the platforms look darker. The physics and collisions were all hackishly put together, but they are of reasonable robustness for this application.
 
-Link to game [here](cube_main.html). I had to use Firefox to run it since Chrome doesn't allow loading the local images by default (also unsure how IE or other browsers react).
+Link to game [here](http://sebastianjay.github.io/CubeWorld/cube_main.html). I had to use Firefox to run it since Chrome doesn't allow loading the local images by default (also unsure how IE or other browsers react).
 
 Controls
 ---
