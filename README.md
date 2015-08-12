@@ -4,8 +4,8 @@ CubeWorld
 A 3D, first person perspective platforming game made for UVa Intro to Graphics (CS 4810).
 This game was developed entirely with WebGL, with some help from the glMatrix library and code from tutorials at [Learning WebGL.com](http://learningwebgl.com/blog/?page_id=1217).
 The game makes use of buffers for pretty much all the rendering -- the ground and siding tiles are in a series of buffers separated by texture. The objects on the map make use of common
-buffers (one for a sphere, cylinder, and cone) whose positions, rotations, and scales are transformed using matrix math. There is also some point lighting to make the lips of the platforms
-look darker. The physics and collisions were all hackishly put together, but they are of reasonable robustness for this application.
+buffers (i.e. one for a sphere, one for a cylinder, and one for a cone) whose positions, rotations, and scales are transformed using matrix math. 
+There is also some point lighting to make the lips of the platforms look darker. The physics and collisions were all hackishly put together, but they are of reasonable robustness for this application.
 
 Link to game [here](cube_main.html). I had to use Firefox to run it since Chrome doesn't allow loading the local images by default (also unsure how IE or other browsers react).
 
