@@ -228,6 +228,9 @@ var jumpMag = 0.00005;
 var jumpInit = 0.007;
 var jumpVel = 0.0;
 
+var poleForce = 0.22;
+var poleMinDist = 6.5;
+
 var healthPoints = 100.0;
 
 function drawScene() {
@@ -270,8 +273,11 @@ function animate() {
   if (lastTime != 0) {
     var elapsed = timeNow - lastTime;
 
+    var xpos1 = xPos;
+    var ypos1 = yPos;
+    var zpos1 = zPos;
+    // walking
     if (walkSpeed != 0) {
-      var xpos1, ypos1, zpos1;
       if (gravY < 0 || gravY > 0) {
         var sign;
         if (gravY < 0)
@@ -300,28 +306,45 @@ function animate() {
         ypos1 = yPos - sign * Math.cos(degToRad(-yaw)) * walkSpeed * elapsed;
         zpos1 = zPos;
       }
+    }
 
-      var retLst = checkCollisionGeneral(xpos1, ypos1, zpos1);
-      if (retLst[0]) {
-        xPos = xpos1;
-        yPos = ypos1;
-        zPos = zpos1;
-      } else {
-        xPos = retLst[1];
-        yPos = retLst[2];
-        zPos = retLst[3];
+    // repulsion from metal poles
+    if (gravX < 0) {
+      var poleDy = 0;
+      var poleDz = 0;
+      for (var i = 0; i < specialWorldPosStack[1].length; i++) {
+        var specObjPos = specialWorldPosStack[1][i];
+        var distSquared = (specObjPos[1] - ypos1)*(specObjPos[1] - ypos1)
+          + (specObjPos[2] - zpos1)*(specObjPos[2] - zpos1);
+        if (distSquared < poleMinDist * poleMinDist) {
+          var normalY = ypos1 - specObjPos[1];
+          var normalZ = zpos1 - specObjPos[2];
+          var normalMag = Math.sqrt(normalY*normalY + normalZ*normalZ);
+          poleDy += (normalY / normalMag) * poleForce / distSquared;
+          poleDz += (normalZ / normalMag) * poleForce / distSquared;
+        }
       }
+      ypos1 += poleDy;
+      zpos1 += poleDz;
     }
 
-    yaw += yawRate * elapsed;
-    /*
-    if (pitch > -pitchLimit && pitch < pitchLimit) {
-      pitch = Math.max(Math.min(pitch + pitchRate * elapsed, pitchLimit), -pitchLimit);
+    var retLst = checkCollisionGeneral(xpos1, ypos1, zpos1);
+    if (retLst[0]) {
+      xPos = xpos1;
+      yPos = ypos1;
+      zPos = zpos1;
+    } else {
+      xPos = retLst[1];
+      yPos = retLst[2];
+      zPos = retLst[3];
     }
-    */
+
+    // yaw and pitch
+    yaw += yawRate * elapsed;
     if ((pitchRate > 0 && pitch < pitchLimit) || (pitchRate < 0 && pitch > -pitchLimit))
       pitch += pitchRate * elapsed;
 
+    // jumping
     if (jumping) {
       jumpVel -= elapsed * jumpMag;
       if (jumpVel < 0) {
@@ -329,21 +352,21 @@ function animate() {
         jumping = false;
         checkGravitySwitch();
       }
-      var xpos1 = xPos + -gravX * jumpVel * elapsed;
-      var ypos1 = yPos + -gravY * jumpVel * elapsed;
-      var zpos1 = zPos + -gravZ * jumpVel * elapsed;
-      xPos = xpos1;
-      yPos = ypos1;
-      zPos = zpos1;
+      var xpos2 = xPos + -gravX * jumpVel * elapsed;
+      var ypos2 = yPos + -gravY * jumpVel * elapsed;
+      var zpos2 = zPos + -gravZ * jumpVel * elapsed;
+      xPos = xpos2;
+      yPos = ypos2;
+      zPos = zpos2;
     } else {
-      var xpos1 = xPos + gravX * gravVel * elapsed;
-      var ypos1 = yPos + gravY * gravVel * elapsed;
-      var zpos1 = zPos + gravZ * gravVel * elapsed;
-      var retLst = checkCollisionGravity(xpos1, ypos1, zpos1);
+      var xpos2 = xPos + gravX * gravVel * elapsed;
+      var ypos2 = yPos + gravY * gravVel * elapsed;
+      var zpos2 = zPos + gravZ * gravVel * elapsed;
+      var retLst = checkCollisionGravity(xpos2, ypos2, zpos2);
       if (retLst[0]) {
-        xPos = xpos1;
-        yPos = ypos1;
-        zPos = zpos1;
+        xPos = xpos2;
+        yPos = ypos2;
+        zPos = zpos2;
         grounded = false;
         gravVel += elapsed * gravMag;
       } else {
