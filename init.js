@@ -247,16 +247,16 @@ function checkEndgame() {
   if (xPos < -cubeSideLength || yPos < -cubeSideLength || zPos < -cubeSideLength ||
     xPos > cubeSideLength || yPos > cubeSideLength || zPos > cubeSideLength || healthPoints <= 0) {
     if (!deathAlertSent) {
-      alert("You died. =(");
+      endgameLabel.innerHTML = "You died. =(";
       deathAlertSent = true;
     }
   }
   if (collectiblesRemaining == 0) {
     if (!winAlertSent) {
       if (deathAlertSent) {
-        alert("You won (albeit as a zombie).");
+        endgameLabel.innerHTML = "You won (albeit as a zombie).";
       } else {
-        alert("You won. Good job, champ!");
+        endgameLabel.innerHTML = "You won. Good job, champ!";
       }
       winAlertSent = true;
     }
@@ -362,7 +362,7 @@ function animate() {
 
     checkCollisionCollectibles();
     checkEndgame();
-    healthLabel.innerHTML = "" + Math.floor(healthPoints);
+    healthLabel.innerHTML = "Health: " + Math.floor(healthPoints);
     //animateLight(elapsed);
   }
   lastTime = timeNow;
@@ -377,10 +377,12 @@ function tick() {
 }
 
 var healthLabel;
+var endgameLabel;
 
 function webGLStart() {
   var canvas = document.getElementById("gl-canvas");
-  healthLabel = document.getElementById("health_text");
+  healthLabel = document.getElementById("health-text");
+  endgameLabel = document.getElementById("endgame-text");
   initGL(canvas);
   initShaders();
   initBuffers();
@@ -396,4 +398,8 @@ function webGLStart() {
   document.onkeyup = handleKeyUp;
 
   tick();
+}
+
+window.onload = function() {
+  webGLStart();
 }

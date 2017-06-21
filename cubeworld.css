@@ -1,0 +1,29 @@
+.canvas-text {
+  position: relative;
+  width: 95%;
+  text-align: right;
+  font-size: 24pt;
+  font-weight: bold;
+  color: #fff;
+  opacity: 0.75;
+}
+
+#health-text {
+  bottom: 8%;
+}
+
+#endgame-text {
+  bottom: 18%;
+  font-size: 16pt;
+}
+
+#gl-canvas {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+#gl-container {
+  width: 1280px;
+  height: 720px;
+}

@@ -69,14 +69,19 @@
   }
 </script>
 
+<link rel="stylesheet" href="cubeworld.css">
+
 <script type="text/javascript" src="init.js"></script>
 
 </head>
 
 
-<body onload="webGLStart();">
-    <canvas id="gl-canvas" style="border: none;" width="1280" height="720"></canvas>
-    <div id="health_text">100</div>
+<body>
+  <div id="gl-container">
+    <canvas id="gl-canvas" width="1280" height="720"></canvas>
+    <div id="health-text" class="canvas-text"></div>
+    <div id="endgame-text" class="canvas-text"></div>
+  </div>
 </body>
 
 </html>
